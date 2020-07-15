@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">One Activiy Base Project</string>
+    <string name="app_name">Intagram Clone</string>
+
+    <string name="go_to_register"><u>Cadastre-se</u></string>
 </resources>

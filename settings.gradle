@@ -1,2 +1,2 @@
 include ':app'
-rootProject.name = "one-activity-base-app"
+rootProject.name = "instagram-clone"
