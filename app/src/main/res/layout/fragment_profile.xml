@@ -116,10 +116,9 @@
             android:layout_weight="1"
             android:orientation="horizontal">
             <Button
-                android:id="@+id/buttonEditProfile"
+                android:id="@+id/profileActionButton"
                 android:layout_width="match_parent"
                 android:layout_height="21dp"
-                android:onClick="goToEditProfile"
                 android:layout_marginLeft="60dp"
                 android:background="@drawable/background_profile_button"
                 android:text="Editar Perfil" />

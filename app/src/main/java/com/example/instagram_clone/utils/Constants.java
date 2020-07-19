@@ -7,6 +7,10 @@ public class Constants {
         public static final int SETTINGS = 20;
     }
 
+    public static class Intent {
+        public static String SELECTED_USER = "selected_user";
+    }
+
     public static class Storage {
         public static final String IMAGES = "images";
         public static final String PROFILE = "profile";

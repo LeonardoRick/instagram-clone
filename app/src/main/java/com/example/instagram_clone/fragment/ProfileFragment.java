@@ -1,33 +1,21 @@
 package com.example.instagram_clone.fragment;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-import android.text.method.PasswordTransformationMethod;
-
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.instagram_clone.R;
 import com.example.instagram_clone.activity.EditProfileActivity;
-import com.example.instagram_clone.model.user.User;
-import com.example.instagram_clone.model.user.UserHelper;
-import com.example.instagram_clone.utils.FirebaseConfig;
-import com.google.firebase.auth.FirebaseAuth;
 
 public class ProfileFragment extends Fragment {
 
@@ -65,7 +53,7 @@ public class ProfileFragment extends Fragment {
         numberFollowers = view.findViewById(R.id.numberFollowers);
         numberFollowing = view.findViewById(R.id.numberFollowing);
 
-        buttonEditProfile = view.findViewById(R.id.buttonEditProfile);
+        buttonEditProfile = view.findViewById(R.id.profileActionButton);
         gridView = view.findViewById(R.id.gridView);
 
         buttonEditProfile.setOnClickListener(new View.OnClickListener() {
@@ -75,7 +63,5 @@ public class ProfileFragment extends Fragment {
             }
         });
     }
-
-
 
 }

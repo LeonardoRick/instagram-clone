@@ -174,6 +174,9 @@ public class EditProfileActivity extends AppCompatActivity {
         return (int) (dp * density); // pixel value
     }
 
+    /**
+     * Change behavior of app backbutton to work like native smartphone backbutton
+     */
     @Override
     public boolean onSupportNavigateUp() {
         finish();

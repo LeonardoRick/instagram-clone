@@ -2,9 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.instagram_clone">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-
     <application
         android:name=".CustomApplication"
         android:allowBackup="true"
@@ -13,11 +10,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.EditProfileActivity"
-            android:parentActivityName=".MainActivity"></activity>
+        <activity android:name=".activity.FriendProfileActivity"
+            android:parentActivityName=".MainActivity"/>
+        <activity
+            android:name=".activity.EditProfileActivity"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".activity.RegisterActivity"
-            android:theme="@style/LoginTheme"></activity>
+            android:theme="@style/LoginTheme" />
         <activity
             android:name=".activity.LoginActivity"
             android:theme="@style/LoginTheme">
@@ -31,5 +31,8 @@
             android:name=".MainActivity"
             android:label="@string/app_name" />
     </application>
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
 </manifest>

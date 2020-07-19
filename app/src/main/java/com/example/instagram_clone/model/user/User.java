@@ -4,10 +4,10 @@ import android.net.Uri;
 
 import com.google.firebase.database.Exclude;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import java.io.Serializable;
 
-public class User {
+
+public class User implements Serializable {
 
 
     private String id;
