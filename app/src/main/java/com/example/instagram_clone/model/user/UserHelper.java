@@ -14,6 +14,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import androidx.annotation.NonNull;
 
 public class UserHelper {
@@ -39,7 +42,7 @@ public class UserHelper {
      * @param user
      * @return boolean to control success of operations
      */
-    public static boolean updateOnDatabase(User user) {
+    public static boolean saveOnDatabase(User user) {
         try {
             FirebaseConfig.getFirebaseDatabase()
                     .child(Constants.UsersNode.KEY)
@@ -50,6 +53,43 @@ public class UserHelper {
             Log.e(TAG, "saveOnDatabase: " + e.getMessage());
             return false;
         }
+    }
+
+    /**
+     *
+     * @param user to update each old value on database
+     * @return boolean that show if operation was sucessfull
+     */
+    public static boolean updateOnDatabase(User user) {
+        try {
+            Map<String, Object> userMap = convertUserToMap(user);
+            FirebaseConfig.getFirebaseDatabase()
+                    .child(Constants.UsersNode.KEY)
+                    .child(user.getId())
+                    .updateChildren(userMap);
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG, "updateOnDatabase: " + e.getMessage() );
+            return false;
+        }
+    }
+
+    /**
+     * @param user to be converted to hashMap to firebase .updateChildren() accepts
+     * @return Map<String, Object> where Object is user info
+     */
+    public static Map<String, Object> convertUserToMap(User user) {
+        Map<String, Object> userMap = new HashMap<>();
+
+        if (user.getId() != null) userMap.put(Constants.UsersNode.ID, user.getId());
+        if (user.getName() != null) userMap.put(Constants.UsersNode.NAME, user.getName());
+        if (user.getEmail() != null) userMap.put(Constants.UsersNode.EMAIL, user.getEmail());
+        if (user.getPicturePath() != null) userMap.put(Constants.UsersNode.PICTURE_PATH, user.getPicturePath());
+
+        userMap.put(Constants.UsersNode.COUNT_POSTS, user.getCountPosts());
+        userMap.put(Constants.UsersNode.COUNT_FOLLOWERS, user.getCountFollowers());
+        userMap.put(Constants.UsersNode.COUNT_FOLLOWING, user.getCountFollowing());
+        return userMap;
     }
 
     /**

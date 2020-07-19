@@ -1,14 +1,19 @@
 package com.example.instagram_clone;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.instagram_clone.activity.EditProfileActivity;
+import com.example.instagram_clone.activity.ProfileActivity;
 import com.example.instagram_clone.fragment.FeedFragment;
 import com.example.instagram_clone.fragment.PostFragment;
-import com.example.instagram_clone.fragment.ProfileFragment;
 import com.example.instagram_clone.fragment.SearchFragment;
+import com.example.instagram_clone.model.user.User;
+import com.example.instagram_clone.model.user.UserHelper;
+import com.example.instagram_clone.utils.Constants;
 import com.example.instagram_clone.utils.FirebaseConfig;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth auth = FirebaseConfig.getAuth();
     private BottomNavigationViewEx bottomNavigation;
+
+    private User loggedUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initActivity() {
+        loggedUser = UserHelper.getLogged();
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.viewPagerFrameLayout, new FeedFragment()).commit();
     }
@@ -83,7 +91,10 @@ public class MainActivity extends AppCompatActivity {
                         fragmentTransaction.replace(R.id.viewPagerFrameLayout, new PostFragment()).commit();
                         return true;
                     case R.id.icProfile:
-                        fragmentTransaction.replace(R.id.viewPagerFrameLayout, new ProfileFragment()).commit();
+                        fragmentTransaction.commit(); // finish fragment transaction with no action
+                        Intent intent  = new Intent(getApplicationContext(), ProfileActivity.class);
+                        intent.putExtra(Constants.IntentKey.SELECTED_USER, loggedUser);
+                        startActivity(intent);
                         return true;
                     default:
                         return false;

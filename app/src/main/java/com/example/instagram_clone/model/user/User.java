@@ -16,6 +16,10 @@ public class User implements Serializable {
     private String password;
     private String picturePath;
 
+    private int countPosts = 0;
+    private int countFollowers = 0;
+    private int countFollowing = 0;
+
     public User() {}
 
     /**
@@ -48,6 +52,12 @@ public class User implements Serializable {
 
     public String getEmail() { return email; }
 
+    public int getCountPosts() { return countPosts; }
+
+    public int getCountFollowers() { return countFollowers; }
+
+    public int getCountFollowing() { return countFollowing; }
+
     @Exclude
     public String getPassword() { return password; }
 
@@ -62,4 +72,10 @@ public class User implements Serializable {
     public void setPassword(String password) { this.password = password; }
 
     public void setPicturePath(String picturePath) {this.picturePath = picturePath; }
+
+    public void setCountPosts(int countPosts) { this.countPosts = countPosts; }
+
+    public void setCountFollowers(int countFollowers) { this.countFollowers = countFollowers; }
+
+    public void setCountFollowing(int countFollowing) { this.countFollowing = countFollowing; }
 }

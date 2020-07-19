@@ -14,11 +14,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.ImageDecoder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Message;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.Editable;
@@ -34,7 +32,7 @@ import com.example.instagram_clone.model.user.User;
 import com.example.instagram_clone.model.user.UserHelper;
 import com.example.instagram_clone.utils.Constants;
 import com.example.instagram_clone.utils.FirebaseConfig;
-import com.example.instagram_clone.utils.GenericHelper;
+import com.example.instagram_clone.utils.BitmapHelper;
 import com.example.instagram_clone.utils.MessageHelper;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -193,7 +191,7 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     private void saveImage(final Bitmap image) {
-        byte[] imgData = GenericHelper.bitmapToByteArray(image);
+        byte[] imgData = BitmapHelper.bitmapToByteArray(image);
 
         StorageReference imageStorageRef = FirebaseConfig.getFirebaseStorage()
                 .child(Constants.Storage.IMAGES)
@@ -221,7 +219,7 @@ public class EditProfileActivity extends AppCompatActivity {
                             UserHelper.updateOnDatabase(user)) {
 
                             profileImage.setImageBitmap(image);
-                            MessageHelper.showLongToast("Sucesso ao atualizar a imagem");
+                            MessageHelper.showLongToast("Imagem atualizada com sucesso");
                         } else
                             MessageHelper.showLongToast("Erro ao atualizar a imagem, tente novamente mais tarde");
 
@@ -325,11 +323,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 switch (requestCode) {
                     case Constants.FeatureRequest.STORAGE:
                         Uri selectedImageUri = data.getData();
-                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-                            ImageDecoder.Source source = ImageDecoder.createSource(getContentResolver(), selectedImageUri);
-                            image = ImageDecoder.decodeBitmap(source);
-                        } else
-                            image = GenericHelper.getDeprecatedBitMap(this, selectedImageUri);
+                        image = BitmapHelper.getBitmap(this, selectedImageUri);
                     break;
                 }
 

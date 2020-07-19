@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment.ProfileFragment">
+    tools:context=".activity.EditProfileActivity">
 
     <ProgressBar
         android:id="@+id/progressBarProfile"
@@ -20,12 +20,16 @@
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
         android:gravity="center_vertical"
         android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
+
+        <include layout="@layout/toolbar"/>
+
         <LinearLayout
+            android:layout_margin="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
@@ -113,6 +117,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:layout_weight="1"
             android:orientation="horizontal">
             <Button
@@ -120,8 +126,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="21dp"
                 android:layout_marginLeft="60dp"
-                android:background="@drawable/background_profile_button"
-                android:text="Editar Perfil" />
+                android:background="@drawable/back_profile_button"
+                android:textColor="@android:color/black"
+                android:text="Carregando" />
         </LinearLayout>
     </LinearLayout>
 

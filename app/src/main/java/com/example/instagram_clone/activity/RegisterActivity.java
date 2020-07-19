@@ -69,7 +69,7 @@ public class RegisterActivity extends AppCompatActivity {
                     user.setId(task.getResult().getUser().getUid());
                     try {
                         UserHelper.updateProfileName(user.getName());
-                        UserHelper.updateOnDatabase(user);
+                        UserHelper.saveOnDatabase(user);
                         MessageHelper.showLongToast("Usuário criado com sucesso");
                         startMainActivity();
                     } catch (Exception e) {

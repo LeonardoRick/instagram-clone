@@ -4,11 +4,13 @@ public class Constants {
 
     public static class FeatureRequest {
         public static final int STORAGE = 10;
-        public static final int SETTINGS = 20;
+        public static final int CAMERA = 20;
+        public static final int SETTINGS = 30;
     }
 
-    public static class Intent {
+    public static class IntentKey {
         public static String SELECTED_USER = "selected_user";
+        public static String SELECTED_PICTURE = "selected_picture";
     }
 
     public static class Storage {
@@ -19,6 +21,16 @@ public class Constants {
 
     public static class UsersNode {
         public static final String KEY = "users";
+        public static final String ID = "id";
         public static final String NAME = "name";
+        public static final String EMAIL = "email";
+        public static final String PICTURE_PATH = "picturePath";
+        public static final String COUNT_POSTS = "countPosts";
+        public static final String COUNT_FOLLOWERS = "countFollowers";
+        public static final String COUNT_FOLLOWING = "countFollowing";
+    }
+
+    public static class FollowNode {
+        public static final String KEY = "follow";
     }
 }

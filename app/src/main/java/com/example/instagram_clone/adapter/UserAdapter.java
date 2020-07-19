@@ -36,16 +36,14 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
         User user = usersList.get(position);
         holder.name.setText(user.getName());
-        holder.email.setText(user.getEmail());
 
         if (user.getPicturePath() != null) {
             Uri uri = Uri.parse(user.getPicturePath());
             Picasso.get().load(uri)
+                    .placeholder(R.drawable.profile)
                     .into(holder.profileImage);
-        } else {
+        } else
             holder.profileImage.setImageResource(R.drawable.profile);
-        }
-
     }
 
     @Override
@@ -54,13 +52,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     }
 
     public class UserViewHolder extends RecyclerView.ViewHolder {
-        private TextView name, email;
+        private TextView name;
         private CircleImageView profileImage;
 
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.textViewUserItemName);
-            email = itemView.findViewById(R.id.textViewUserItemEmail);
             profileImage = itemView.findViewById(R.id.circleImageViewUserItemImage);
         }
     }

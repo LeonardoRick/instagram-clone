@@ -7,4 +7,5 @@
     <color name="purple">#462759</color>
     <color name="mediumGray">#EBEBEB</color>
     <color name="darkGray">#484C4E</color>
+    <color name="profilButtonBorder">#DFDFDF</color>
 </resources>

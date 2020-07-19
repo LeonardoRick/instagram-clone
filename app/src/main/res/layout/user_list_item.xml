@@ -20,11 +20,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Nome"/>
-        <TextView
-            android:id="@+id/textViewUserItemEmail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="E-mail"/>
     </LinearLayout>
 
 </LinearLayout>

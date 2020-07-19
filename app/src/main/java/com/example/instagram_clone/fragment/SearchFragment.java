@@ -1,6 +1,5 @@
 package com.example.instagram_clone.fragment;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -14,21 +13,19 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 
 import com.example.instagram_clone.R;
-import com.example.instagram_clone.activity.FriendProfileActivity;
+import com.example.instagram_clone.activity.EditProfileActivity;
+import com.example.instagram_clone.activity.ProfileActivity;
 import com.example.instagram_clone.adapter.UserAdapter;
 import com.example.instagram_clone.model.user.User;
-import com.example.instagram_clone.model.user.UserHelper;
 import com.example.instagram_clone.utils.Constants;
 import com.example.instagram_clone.utils.FirebaseConfig;
 import com.example.instagram_clone.utils.RecyclerItemClickListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
@@ -105,6 +102,16 @@ public class SearchFragment extends Fragment {
                 return true;
             }
         });
+
+        ImageView closeButton =  searchView.findViewById(R.id.search_close_btn);
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                usersList.clear();
+                adapter.notifyDataSetChanged();
+                searchView.onActionViewCollapsed();
+            }
+        });
     }
 
     /**
@@ -138,7 +145,7 @@ public class SearchFragment extends Fragment {
     }
 
     /**
-     * start FriendProfileActivity with info form selected user
+     * start EditProfileActivity with info form selected user
      */
     private void setRecyclerViewListener() {
         recyclerView.addOnItemTouchListener(
@@ -148,8 +155,8 @@ public class SearchFragment extends Fragment {
                         new RecyclerItemClickListener.OnItemClickListener() {
                             @Override
                             public void onItemClick(View view, int position) {
-                                Intent intent = new Intent(getContext(), FriendProfileActivity.class);
-                                intent.putExtra(Constants.Intent.SELECTED_USER, usersList.get(position));
+                                Intent intent = new Intent(getContext(), ProfileActivity.class);
+                                intent.putExtra(Constants.IntentKey.SELECTED_USER, usersList.get(position));
                                 startActivity(intent);
                             }
 
