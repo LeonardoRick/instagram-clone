@@ -2,8 +2,9 @@
 <resources>
     <color name="colorPrimary">#FFFFFF</color>
     <color name="colorPrimaryDark">#000000</color>
-    <color name="colorAccent">#F1C836</color>
+    <color name="colorAccent">#A03D89</color>
 
     <color name="purple">#462759</color>
-    <color name="mediumGray">#DBDBDB</color>
+    <color name="mediumGray">#EBEBEB</color>
+    <color name="darkGray">#484C4E</color>
 </resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/icHome"
+        android:icon="@drawable/ic_home_black"
+        android:title="Home"/>
+
+    <item
+        android:id="@+id/icSearch"
+        android:icon="@drawable/ic_search_black"
+        android:title="Pesquisa"/>
+
+    <item
+        android:id="@+id/icAddPicture"
+        android:icon="@drawable/ic_add_black"
+        android:title="Postagem"/>
+
+    <item
+        android:id="@+id/icProfile"
+        android:icon="@drawable/ic_profile_black"
+        android:title="Perfil"/>
+</menu>

@@ -1,5 +1,7 @@
 package com.example.instagram_clone.model.user;
 
+import android.net.Uri;
+
 import com.google.firebase.database.Exclude;
 
 import androidx.annotation.NonNull;
@@ -7,20 +9,25 @@ import androidx.annotation.Nullable;
 
 public class User {
 
-    @Nullable
-    private String id;
-    @Nullable
-    private String name;
-    @NonNull
-    private String email;
-    @NonNull
-    private String password;
-    @Nullable
-    private String picturePath;
 
+    private String id;
+    private String name;
+    private String email;
+    private String password;
+    private String picturePath;
 
     public User() {}
 
+    /**
+     * Used only to get user view FirebaseAuth (We need a Uri param in this case)
+     */
+    public User (String id, String name, String email, Uri picture) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        if (picture != null)
+            this.picturePath = picture.toString();
+    }
     public User(String email, String password) {
         this.email = email;
         this.password = password;

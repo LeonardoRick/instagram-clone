@@ -8,12 +8,12 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.example.instagram_clone.MainActivity;
 import com.example.instagram_clone.R;
 import com.example.instagram_clone.utils.FirebaseConfig;
 import com.example.instagram_clone.model.user.User;
+import com.example.instagram_clone.utils.MessageHelper;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -52,7 +52,7 @@ public class LoginActivity extends AppCompatActivity {
         if (!textEmail.isEmpty() && !textPassword.isEmpty())
             login(new User(textEmail, textPassword));
         else
-            showLongToast("Preencha todos os campos");
+            MessageHelper.showLongToast("Preencha todos os campos");
     }
 
     private void login(User user) {
@@ -63,17 +63,17 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    showLongToast("Usuário logado");
+                    MessageHelper.showLongToast("Usuário logado");
                     startMainActivity();
                 } else {
                     try {
                         throw (task.getException());
                     } catch (FirebaseAuthInvalidCredentialsException e) {
-                        showLongToast("Email ou senha inválidos");
+                        MessageHelper.showLongToast("Email ou senha inválidos");
                     } catch (FirebaseAuthInvalidUserException e) {
-                        showLongToast("Usuário não cadastrado");
+                        MessageHelper.showLongToast("Usuário não cadastrado");
                     } catch (Exception e) {
-                        showLongToast("Algo deu errado: " + e.getMessage());
+                        MessageHelper.showLongToast("Algo deu errado: " + e.getMessage());
                     }
                 }
                 progressBar.setVisibility(View.GONE);
@@ -87,9 +87,5 @@ public class LoginActivity extends AppCompatActivity {
     }
     public void navigateToRegister(View view) {
         startActivity(new Intent(this, RegisterActivity.class));
-    }
-
-    private void showLongToast(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
 }

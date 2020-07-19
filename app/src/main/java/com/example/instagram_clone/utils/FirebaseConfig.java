@@ -4,13 +4,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 public class FirebaseConfig {
 
-    public static FirebaseAuth auth;
-    public static DatabaseReference databaseRef;
-    public static FirebaseStorage storageRef;
-
+    private static FirebaseAuth auth;
+    private static DatabaseReference databaseRef;
+    private static StorageReference storageRef;
 
     /**
      * Static method to keep FirebaseAuth as one instance on entire app
@@ -34,8 +34,8 @@ public class FirebaseConfig {
      * Static method to keep StorageReference as one instance on entire app
      * @return StorageReference global instance
      */
-    public static FirebaseStorage getFirebaseStorage() {
-        if (storageRef == null) storageRef = FirebaseStorage.getInstance();
+    public static StorageReference getFirebaseStorage() {
+        if (storageRef == null) storageRef = FirebaseStorage.getInstance().getReference();
         return storageRef;
     }
 }
