@@ -15,15 +15,22 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.example.instagram_clone.R;
 import com.example.instagram_clone.adapter.ThumbnailAdapter;
 import com.example.instagram_clone.model.post.Post;
+import com.example.instagram_clone.model.post.PostHelper;
 import com.example.instagram_clone.model.user.UserHelper;
 import com.example.instagram_clone.utils.Constants;
 import com.example.instagram_clone.utils.BitmapHelper;
 import com.example.instagram_clone.utils.FirebaseConfig;
+import com.example.instagram_clone.utils.MessageHelper;
 import com.example.instagram_clone.utils.RecyclerItemClickListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.zomato.photofilters.FilterPack;
 import com.zomato.photofilters.imageprocessors.Filter;
 import com.zomato.photofilters.utils.ThumbnailItem;
@@ -31,6 +38,7 @@ import com.zomato.photofilters.utils.ThumbnailsManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class FilterActivity extends AppCompatActivity {
 
@@ -45,6 +53,7 @@ public class FilterActivity extends AppCompatActivity {
 
     private ImageView selectedImageView;
     private EditText imageDesc;
+    private ProgressBar progressBarUploadImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +72,8 @@ public class FilterActivity extends AppCompatActivity {
     private void initViewElements() {
         selectedImageView = findViewById(R.id.selectedImageView);
         imageDesc = findViewById(R.id.textFilterDescription);
+        progressBarUploadImage = findViewById(R.id.progressBarUploadImage);
+
         configRecyclerView();
         recoverSelectedImageInfo();
     }
@@ -150,17 +161,54 @@ public class FilterActivity extends AppCompatActivity {
      * Method called when user clicks "check" button to post image
      */
     private void publishPost() {
-        String loggedUserId = UserHelper.getLogged().getId();
-        FirebaseConfig.getFirebaseStorage()
+        final String loggedUserId = UserHelper.getLogged().getId();
+        final String imageId = FirebaseConfig.getFirebaseDatabase()
+                .child(Constants.PostNode.KEY).push().getKey();
+
+        StorageReference storageRef = FirebaseConfig.getFirebaseStorage()
                 .child(Constants.Storage.IMAGES)
                 .child(Constants.Storage.POST)
-                .child(loggedUserId);
+                .child(loggedUserId)
+                .child(imageId + Constants.Storage.JPEG);
 
-        Post post = new Post();
-        post.setUserId(loggedUserId);
-        post.setPicturePath("");
-        if (imageDesc.getText() != null)
-            post.setDesc(imageDesc.getText().toString());
+        byte[] imgData = BitmapHelper.bitmapToByteArray(filteredImage);
+
+        UploadTask uploadTask = storageRef.putBytes(imgData);
+
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                progressBarUploadImage.setVisibility(View.GONE);
+                MessageHelper.showLongToast("Erro ao fazer upload da imagem, tente novamente mais tarde");
+            }
+        });
+        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                taskSnapshot.getMetadata().getReference().getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        Post post = new Post();
+                        post.setId(imageId);
+                        post.setUserId(loggedUserId);
+                        post.setPicturePath(uri.toString());
+                        if (imageDesc.getText() != null)
+                            post.setDesc(imageDesc.getText().toString());
+
+                        if (PostHelper.saveOnDatabase(post)) {
+                            MessageHelper.showLongToast("Sucesso ao fazer upload da imagem");
+                            finish();
+                        }
+                        else
+                            MessageHelper.showLongToast("Erro ao fazer upload da imagem, tente novamente mais tarde");
+
+                        progressBarUploadImage.setVisibility(View.GONE);
+                    }
+                });
+            }
+        });
+
+
     }
 
     @Override
@@ -173,6 +221,7 @@ public class FilterActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.ic_save_post:
+                progressBarUploadImage.setVisibility(View.VISIBLE);
                 publishPost();
                 break;
         }
