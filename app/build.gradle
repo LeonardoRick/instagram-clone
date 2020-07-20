@@ -49,4 +49,7 @@ dependencies {
 
     // Picasso
     implementation 'com.squareup.picasso:picasso:2.71828'
+
+    //AndroidPhotoFilters
+    implementation 'info.androidhive:imagefilters:1.0.7'
 }

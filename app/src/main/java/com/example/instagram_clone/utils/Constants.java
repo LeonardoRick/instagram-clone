@@ -16,6 +16,7 @@ public class Constants {
     public static class Storage {
         public static final String IMAGES = "images";
         public static final String PROFILE = "profile";
+        public static final String POST = "post";
         public static final String JPEG = ".jpeg";
     }
 
@@ -32,5 +33,9 @@ public class Constants {
 
     public static class FollowNode {
         public static final String KEY = "follow";
+    }
+
+    public static class PostNode  {
+        public static final String KEY = "posts";
     }
 }
