@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Intagram Clone</string>
+    <string name="app_name">Instagram Clone</string>
 
     <string name="go_to_register"><u>Cadastre-se</u></string>
     <string name="update_image"><u>Alterar foto de perfil</u></string>

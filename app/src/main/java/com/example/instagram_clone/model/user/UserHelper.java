@@ -84,7 +84,7 @@ public class UserHelper {
         if (user.getId() != null) userMap.put(Constants.UsersNode.ID, user.getId());
         if (user.getName() != null) userMap.put(Constants.UsersNode.NAME, user.getName());
         if (user.getEmail() != null) userMap.put(Constants.UsersNode.EMAIL, user.getEmail());
-        if (user.getPicturePath() != null) userMap.put(Constants.UsersNode.PICTURE_PATH, user.getPicturePath());
+        if (user.getImagePath() != null) userMap.put(Constants.UsersNode.PICTURE_PATH, user.getImagePath());
 
         userMap.put(Constants.UsersNode.COUNT_POSTS, user.getCountPosts());
         userMap.put(Constants.UsersNode.COUNT_FOLLOWERS, user.getCountFollowers());

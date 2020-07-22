@@ -14,7 +14,7 @@ public class User implements Serializable {
     private String name;
     private String email;
     private String password;
-    private String picturePath;
+    private String imagePath;
 
     private int countPosts = 0;
     private int countFollowers = 0;
@@ -30,7 +30,7 @@ public class User implements Serializable {
         this.name = name;
         this.email = email;
         if (picture != null)
-            this.picturePath = picture.toString();
+            this.imagePath = picture.toString();
     }
     public User(String email, String password) {
         this.email = email;
@@ -63,7 +63,7 @@ public class User implements Serializable {
     @Exclude
     public String getPassword() { return password; }
 
-    public String getPicturePath() { return picturePath; }
+    public String getImagePath() { return imagePath; }
 
     public void setId(String id) { this.id = id;}
 
@@ -73,7 +73,7 @@ public class User implements Serializable {
 
     public void setPassword(String password) { this.password = password; }
 
-    public void setPicturePath(String picturePath) {this.picturePath = picturePath; }
+    public void setImagePath(String imagePath) {this.imagePath = imagePath; }
 
     public void setCountPosts(int countPosts) { this.countPosts = countPosts; }
 

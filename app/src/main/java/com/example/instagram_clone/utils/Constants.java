@@ -10,7 +10,10 @@ public class Constants {
 
     public static class IntentKey {
         public static String SELECTED_USER = "selected_user";
-        public static String SELECTED_PICTURE = "selected_picture";
+        public static String SELECTED_IMAGE = "selected_image";
+        public static String SELECTED_POST = "selected_post";
+
+        public static String NAV_BOTTOM = "NAV_BOTTOM" ;
     }
 
     public static class Storage {

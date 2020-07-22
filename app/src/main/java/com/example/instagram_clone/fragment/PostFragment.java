@@ -17,7 +17,6 @@ import androidx.fragment.app.Fragment;
 
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -191,7 +190,7 @@ public class PostFragment extends Fragment {
 
     private void startFilterActivity(Uri imageUri) {
         Intent intent = new Intent(getActivity(), FilterActivity.class);
-        intent.putExtra(Constants.IntentKey.SELECTED_PICTURE, imageUri.toString());
+        intent.putExtra(Constants.IntentKey.SELECTED_IMAGE, imageUri.toString());
         startActivity(intent);
     }
 }

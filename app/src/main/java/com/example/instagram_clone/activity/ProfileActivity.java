@@ -8,11 +8,15 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 
+import com.example.instagram_clone.MainActivity;
 import com.example.instagram_clone.R;
 import com.example.instagram_clone.adapter.GridAdapter;
 import com.example.instagram_clone.model.post.Post;
@@ -21,10 +25,12 @@ import com.example.instagram_clone.model.user.User;
 import com.example.instagram_clone.model.user.UserHelper;
 import com.example.instagram_clone.utils.Constants;
 import com.example.instagram_clone.utils.FirebaseConfig;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -39,8 +45,11 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView numberPosts, numberFollowers, numberFollowing;
     private Button profileActionButton;
     private CircleImageView profileImage;
+    private BottomNavigationViewEx profileBottomNavigation;
+
     private GridView gridView;
     private GridAdapter gripAdapter;
+    private List<Post> postsList = new ArrayList<>();
 
     private DatabaseReference selectedUserRef;
     private ValueEventListener valueEventListener;
@@ -51,8 +60,7 @@ public class ProfileActivity extends AppCompatActivity {
         // Config Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true); // enable back button
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_black); // change icon of back button
+
 
         loggedUser = UserHelper.getLogged();
 
@@ -78,6 +86,7 @@ public class ProfileActivity extends AppCompatActivity {
         numberPosts = findViewById(R.id.numberPosts);
         numberFollowers = findViewById(R.id.numberFollowers);
         numberFollowing = findViewById(R.id.numberFollowing);
+        profileBottomNavigation = findViewById(R.id.profileBottomNav);
     }
 
     /**
@@ -91,8 +100,9 @@ public class ProfileActivity extends AppCompatActivity {
             setUserNumbersListener();
 
             configInterface();
-            if (selectedUser.getPicturePath() != null) {
-                Uri uri = Uri.parse(selectedUser.getPicturePath());
+
+            if (selectedUser.getImagePath() != null) {
+                Uri uri = Uri.parse(selectedUser.getImagePath());
                 Picasso.get().load(uri)
                         .placeholder(R.drawable.profile)
                         .into(profileImage);
@@ -136,6 +146,7 @@ public class ProfileActivity extends AppCompatActivity {
         else
             confiInterfaceToFriendProfile();
         loadUserPosts();
+        configPostClickListener();
     }
     private void configInterfaceToLoggedUser() {
         getSupportActionBar().setTitle("Perfil");
@@ -146,9 +157,15 @@ public class ProfileActivity extends AppCompatActivity {
                 startActivity(new Intent(getApplicationContext(), EditProfileActivity.class));
             }
         });
+
+        configBottomNavigation();
     }
     private void confiInterfaceToFriendProfile() {
+        profileBottomNavigation.setVisibility(View.GONE);
+
         getSupportActionBar().setTitle(selectedUser.getName());
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true); // enable back button
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_black); // change icon of back button
 
         checkIfLoggedFollowSelectedUser();
         profileActionButton.setOnClickListener(new View.OnClickListener() {
@@ -167,7 +184,6 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
-
     /**
      * Config grid adapter to show posts of user as grid
      */
@@ -185,16 +201,13 @@ public class ProfileActivity extends AppCompatActivity {
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                        // config grid size
-//                        int gridSize = getResources().getDisplayMetrics().widthPixels;
-//                        int imageWidth = gridSize / 3;
-//                        gridView.setColumnWidth(imageWidth);
                         if (dataSnapshot.exists()) {
                             List<String> postsUrl = new ArrayList<>();
                             for (DataSnapshot data : dataSnapshot.getChildren()) {
                                 Post post = data.getValue(Post.class);
-                                postsUrl.add(post.getPicturePath());
+                                postsList.add(post);
+                                postsUrl.add(post.getImagePath());
+                                Log.d("TAG", "onDataChange: " + post.getImagePath());
                             }
                             configGridView(postsUrl);
                         }
@@ -203,6 +216,19 @@ public class ProfileActivity extends AppCompatActivity {
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) { }
                 });
+    }
+
+
+    private void configPostClickListener() {
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getApplicationContext(), PostInfoActivity.class);
+                intent.putExtra(Constants.IntentKey.SELECTED_USER, selectedUser);
+                intent.putExtra(Constants.IntentKey.SELECTED_POST, postsList.get(position));
+                startActivity(intent);
+            }
+        });
     }
 
     /**
@@ -264,5 +290,41 @@ public class ProfileActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         finish();
         return false;
+    }
+
+    /**
+     * Config bottom navigation only if user is viewing his own profile
+     * to make it  looks more like a menu
+     */
+    private void configBottomNavigation() {
+        profileBottomNavigation = findViewById(R.id.profileBottomNav);
+        // animations
+        profileBottomNavigation.enableAnimation(true);
+        profileBottomNavigation.enableItemShiftingMode(true);
+        profileBottomNavigation.enableShiftingMode(false);
+        profileBottomNavigation.setTextVisibility(false);
+
+        // Enable navigation
+        enableNavigation(profileBottomNavigation);
+
+    }
+    /**
+     * Method that treats click events on BottomNavigationViewEx buttons to return
+     * To main activity with right id
+     */
+    private void enableNavigation(BottomNavigationViewEx viewEx) {
+        viewEx.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                if (item.getItemId() == R.id.icProfile) return false;
+                else {
+                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    intent.putExtra(Constants.IntentKey.NAV_BOTTOM, item.getItemId());
+                    startActivity(intent);
+                    finish();
+                    return true;
+                }
+            };
+        });
     }
 }

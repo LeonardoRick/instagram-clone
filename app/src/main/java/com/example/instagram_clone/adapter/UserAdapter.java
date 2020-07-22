@@ -37,8 +37,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         User user = usersList.get(position);
         holder.name.setText(user.getName());
 
-        if (user.getPicturePath() != null) {
-            Uri uri = Uri.parse(user.getPicturePath());
+        if (user.getImagePath() != null) {
+            Uri uri = Uri.parse(user.getImagePath());
             Picasso.get().load(uri)
                     .placeholder(R.drawable.profile)
                     .into(holder.profileImage);

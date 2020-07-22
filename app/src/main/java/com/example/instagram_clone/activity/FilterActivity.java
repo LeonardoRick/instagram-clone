@@ -87,7 +87,7 @@ public class FilterActivity extends AppCompatActivity {
 
     private void recoverSelectedImageInfo() {
         if (getIntent().getExtras() != null) {
-            String imagePath = (String) getIntent().getExtras().getSerializable(Constants.IntentKey.SELECTED_PICTURE);
+            String imagePath = (String) getIntent().getExtras().getSerializable(Constants.IntentKey.SELECTED_IMAGE);
             Uri selectedImageUri  = Uri.parse(imagePath);
 
             image = BitmapHelper.getBitmap(this, selectedImageUri);
@@ -220,7 +220,7 @@ public class FilterActivity extends AppCompatActivity {
                         Post post = new Post();
                         post.setId(imageId);
                         post.setUserId(loggedUser.getId());
-                        post.setPicturePath(uri.toString());
+                        post.setImagePath(uri.toString());
                         if (imageDesc.getText() != null)
                             post.setDesc(imageDesc.getText().toString());
 

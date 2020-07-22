@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
         initActivity();
         configBottomView();
+        defineTabReturnedFromProfileActivity();
     }
     private void configBottomView() {
         int FEED_INDEX = 0;
@@ -119,5 +120,27 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * When returning from profile activity we need to set right clicked tab.
+     * We don't need to define a case to profile tab because he is comming from there
+     */
+    private void defineTabReturnedFromProfileActivity() {
+        if (getIntent().getExtras() != null) {
+            int tabId = getIntent().getExtras().getInt(Constants.IntentKey.NAV_BOTTOM);
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            switch (tabId) {
+                case R.id.icHome:
+                    fragmentTransaction.replace(R.id.viewPagerFrameLayout, new FeedFragment()).commit();
+                    break;
+                case R.id.icSearch:
+                    fragmentTransaction.replace(R.id.viewPagerFrameLayout, new SearchFragment()).commit();
+                    break;
+                case R.id.icAddPicture:
+                    fragmentTransaction.replace(R.id.viewPagerFrameLayout, new PostFragment()).commit();
+                    break;
+            }
+        };
     }
 }

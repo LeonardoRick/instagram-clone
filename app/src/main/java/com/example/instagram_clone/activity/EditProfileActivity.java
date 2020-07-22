@@ -75,8 +75,8 @@ public class EditProfileActivity extends AppCompatActivity {
             editTextProfileName.setText(UserHelper.getLogged().getName());
             editTextProfileEmail.setText(UserHelper.getLogged().getEmail());
 
-            if (user.getPicturePath() != null) {
-                Uri uri = Uri.parse(user.getPicturePath());
+            if (user.getImagePath() != null) {
+                Uri uri = Uri.parse(user.getImagePath());
                 Picasso.get().load(uri)
                         .placeholder(R.drawable.profile)
                         .error(R.drawable.profile)
@@ -213,7 +213,7 @@ public class EditProfileActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Uri uri) {
                         User user = UserHelper.getLogged();
-                        user.setPicturePath(uri.toString());
+                        user.setImagePath(uri.toString());
 
                         if (UserHelper.updateProfilePicture(uri) &&
                             UserHelper.updateOnDatabase(user)) {

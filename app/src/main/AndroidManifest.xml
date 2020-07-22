@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.instagram_clone">
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".CustomApplication"
@@ -14,6 +10,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name=".activity.LoginActivity"
             android:theme="@style/LoginTheme">
@@ -32,12 +29,19 @@
         <activity
             android:name=".activity.ProfileActivity"
             android:parentActivityName=".MainActivity" />
+        <activity android:name=".activity.PostInfoActivity"
+            android:parentActivityName=".activity.ProfileActivity"/>
         <activity
             android:name=".activity.EditProfileActivity"
             android:parentActivityName=".activity.ProfileActivity" />
-
-        <activity android:name=".activity.FilterActivity"
-            android:parentActivityName=".MainActivity"/>
+        <activity
+            android:name=".activity.FilterActivity"
+            android:parentActivityName=".MainActivity" />
     </application>
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
 </manifest>
