@@ -14,6 +14,8 @@ import android.widget.GridView;
 import android.widget.TextView;
 
 import com.example.instagram_clone.R;
+import com.example.instagram_clone.adapter.GridAdapter;
+import com.example.instagram_clone.model.post.Post;
 import com.example.instagram_clone.utils.FollowHelper;
 import com.example.instagram_clone.model.user.User;
 import com.example.instagram_clone.model.user.UserHelper;
@@ -25,6 +27,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ProfileActivity extends AppCompatActivity {
 
     private User selectedUser;
@@ -35,6 +40,7 @@ public class ProfileActivity extends AppCompatActivity {
     private Button profileActionButton;
     private CircleImageView profileImage;
     private GridView gridView;
+    private GridAdapter gripAdapter;
 
     private DatabaseReference selectedUserRef;
     private ValueEventListener valueEventListener;
@@ -85,7 +91,6 @@ public class ProfileActivity extends AppCompatActivity {
             setUserNumbersListener();
 
             configInterface();
-
             if (selectedUser.getPicturePath() != null) {
                 Uri uri = Uri.parse(selectedUser.getPicturePath());
                 Picasso.get().load(uri)
@@ -130,6 +135,7 @@ public class ProfileActivity extends AppCompatActivity {
             configInterfaceToLoggedUser();
         else
             confiInterfaceToFriendProfile();
+        loadUserPosts();
     }
     private void configInterfaceToLoggedUser() {
         getSupportActionBar().setTitle("Perfil");
@@ -161,9 +167,48 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
+
+    /**
+     * Config grid adapter to show posts of user as grid
+     */
+    private void configGridView(List<String> postsUrl) {
+        gripAdapter = new GridAdapter(getApplicationContext(), R.layout.post, postsUrl);
+        gridView.setAdapter(gripAdapter);
+    }
+    /**
+     * Load user posts on gridView
+     */
+    private void loadUserPosts() {
+        FirebaseConfig.getFirebaseDatabase()
+                .child(Constants.PostNode.KEY)
+                .child(selectedUser.getId())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                        // config grid size
+//                        int gridSize = getResources().getDisplayMetrics().widthPixels;
+//                        int imageWidth = gridSize / 3;
+//                        gridView.setColumnWidth(imageWidth);
+                        if (dataSnapshot.exists()) {
+                            List<String> postsUrl = new ArrayList<>();
+                            for (DataSnapshot data : dataSnapshot.getChildren()) {
+                                Post post = data.getValue(Post.class);
+                                postsUrl.add(post.getPicturePath());
+                            }
+                            configGridView(postsUrl);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) { }
+                });
+    }
+
     /**
      * Update numbers following and followers on loggedUser and selectedUser when
      * loggedUser follow or unfollow selectedUser
+     * @param isFollowAction to check if is a follow or unfollow action
      */
     private void updateNumbers(boolean isFollowAction) {
         int countLoggedFollowing = loggedUser.getCountFollowing();

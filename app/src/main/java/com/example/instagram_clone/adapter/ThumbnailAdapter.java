@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.instagram_clone.R;
+import com.example.instagram_clone.utils.SquareImageView;
 import com.zomato.photofilters.utils.ThumbnailItem;
 
 import java.util.List;

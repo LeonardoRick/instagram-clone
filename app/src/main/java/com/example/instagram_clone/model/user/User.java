@@ -43,7 +43,9 @@ public class User implements Serializable {
         this.password = password;
     }
 
-
+    public void incrementCountPosts() {
+        this.countPosts++;
+    }
     /********* getters and setters *******/
 
     public String getId() { return id; }

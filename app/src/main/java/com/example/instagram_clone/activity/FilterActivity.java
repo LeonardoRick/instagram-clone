@@ -21,6 +21,7 @@ import com.example.instagram_clone.R;
 import com.example.instagram_clone.adapter.ThumbnailAdapter;
 import com.example.instagram_clone.model.post.Post;
 import com.example.instagram_clone.model.post.PostHelper;
+import com.example.instagram_clone.model.user.User;
 import com.example.instagram_clone.model.user.UserHelper;
 import com.example.instagram_clone.utils.Constants;
 import com.example.instagram_clone.utils.BitmapHelper;
@@ -29,6 +30,9 @@ import com.example.instagram_clone.utils.MessageHelper;
 import com.example.instagram_clone.utils.RecyclerItemClickListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.zomato.photofilters.FilterPack;
@@ -38,7 +42,6 @@ import com.zomato.photofilters.utils.ThumbnailsManager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class FilterActivity extends AppCompatActivity {
 
@@ -47,6 +50,8 @@ public class FilterActivity extends AppCompatActivity {
     private Bitmap image;
     private Bitmap filteredImage;
     private List<ThumbnailItem> thumbnailsList = new ArrayList<>();
+    private User loggedUser;
+    private boolean userIsLoaded = false;
 
     private RecyclerView recyclerFilters;
     private ThumbnailAdapter adapter;
@@ -66,6 +71,7 @@ public class FilterActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true); // enable back button
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_black); // change backbutton icon
 
+        loggedUser = UserHelper.getLogged();
         initViewElements();
     }
 
@@ -76,6 +82,7 @@ public class FilterActivity extends AppCompatActivity {
 
         configRecyclerView();
         recoverSelectedImageInfo();
+        recoverSelectedUserCountPostsInfo();
     }
 
     private void recoverSelectedImageInfo() {
@@ -90,6 +97,27 @@ public class FilterActivity extends AppCompatActivity {
 
             recoverFiltersList();
         }
+    }
+
+    /**
+     * Method used to recover logged user info with
+     * only the purpose of update post number
+     */
+    private void recoverSelectedUserCountPostsInfo() {
+        FirebaseConfig.getFirebaseDatabase()
+                .child(Constants.UsersNode.KEY)
+                .child(loggedUser.getId())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        // used only to update user number of posts on database
+                        loggedUser = dataSnapshot.getValue(User.class);
+                        userIsLoaded = true;
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) { }
+                });
     }
 
     public void recoverFiltersList() {
@@ -161,14 +189,14 @@ public class FilterActivity extends AppCompatActivity {
      * Method called when user clicks "check" button to post image
      */
     private void publishPost() {
-        final String loggedUserId = UserHelper.getLogged().getId();
+
         final String imageId = FirebaseConfig.getFirebaseDatabase()
                 .child(Constants.PostNode.KEY).push().getKey();
 
         StorageReference storageRef = FirebaseConfig.getFirebaseStorage()
                 .child(Constants.Storage.IMAGES)
                 .child(Constants.Storage.POST)
-                .child(loggedUserId)
+                .child(loggedUser.getId())
                 .child(imageId + Constants.Storage.JPEG);
 
         byte[] imgData = BitmapHelper.bitmapToByteArray(filteredImage);
@@ -188,14 +216,17 @@ public class FilterActivity extends AppCompatActivity {
                 taskSnapshot.getMetadata().getReference().getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
                     public void onSuccess(Uri uri) {
+
                         Post post = new Post();
                         post.setId(imageId);
-                        post.setUserId(loggedUserId);
+                        post.setUserId(loggedUser.getId());
                         post.setPicturePath(uri.toString());
                         if (imageDesc.getText() != null)
                             post.setDesc(imageDesc.getText().toString());
 
-                        if (PostHelper.saveOnDatabase(post)) {
+                        loggedUser.incrementCountPosts();
+                        if (PostHelper.saveOnDatabase(post)
+                                &&UserHelper.updateOnDatabase(loggedUser)) {
                             MessageHelper.showLongToast("Sucesso ao fazer upload da imagem");
                             finish();
                         }
@@ -221,8 +252,11 @@ public class FilterActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.ic_save_post:
-                progressBarUploadImage.setVisibility(View.VISIBLE);
-                publishPost();
+                if (userIsLoaded) {
+                    progressBarUploadImage.setVisibility(View.VISIBLE);
+                    publishPost();
+                } else
+                    MessageHelper.showLongToast("Aguarde o carregamento das informações essenciais");
                 break;
         }
         return super.onOptionsItemSelected(item);
