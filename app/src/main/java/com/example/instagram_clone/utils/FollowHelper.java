@@ -8,15 +8,16 @@ public class FollowHelper {
 
     public static final String TAG = "FollowHelper";
     /**
-     * save followed user inside structure follower id -> followed user id
+     * save followed id --> following id
      * @param selectedUser followed
      */
     public static boolean follow(User selectedUser) {
         try {
             FirebaseConfig.getFirebaseDatabase()
                     .child(Constants.FollowNode.KEY)
-                    .child(UserHelper.getLogged().getId())
                     .child(selectedUser.getId())
+                    .child(UserHelper.getLogged().getId())
+                    .child(Constants.FollowNode.FOLLOWER)
                     .setValue(true);
             return true;
         } catch (Exception e) {
@@ -26,15 +27,16 @@ public class FollowHelper {
     }
 
     /**
-     * remove structure follower id -> followed user id
+     * remove structure followed user id -> follower id
      * @param selectedUser followed
      */
     public static boolean unfollow(User selectedUser) {
         try {
             FirebaseConfig.getFirebaseDatabase()
                     .child(Constants.FollowNode.KEY)
-                    .child(UserHelper.getLogged().getId())
                     .child(selectedUser.getId())
+                    .child(UserHelper.getLogged().getId())
+                    .child(Constants.FollowNode.FOLLOWER)
                     .removeValue();
             return true;
         } catch (Exception e) {
@@ -42,4 +44,6 @@ public class FollowHelper {
             return false;
         }
     }
+
+
 }

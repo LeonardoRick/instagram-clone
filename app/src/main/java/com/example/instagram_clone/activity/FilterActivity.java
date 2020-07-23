@@ -1,6 +1,7 @@
 package com.example.instagram_clone.activity;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,7 +16,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 
 import com.example.instagram_clone.R;
 import com.example.instagram_clone.adapter.ThumbnailAdapter;
@@ -58,7 +58,6 @@ public class FilterActivity extends AppCompatActivity {
 
     private ImageView selectedImageView;
     private EditText imageDesc;
-    private ProgressBar progressBarUploadImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +77,6 @@ public class FilterActivity extends AppCompatActivity {
     private void initViewElements() {
         selectedImageView = findViewById(R.id.selectedImageView);
         imageDesc = findViewById(R.id.textFilterDescription);
-        progressBarUploadImage = findViewById(R.id.progressBarUploadImage);
 
         configRecyclerView();
         recoverSelectedImageInfo();
@@ -104,6 +102,7 @@ public class FilterActivity extends AppCompatActivity {
      * only the purpose of update post number
      */
     private void recoverSelectedUserCountPostsInfo() {
+        MessageHelper.openLoadingDialog(this, "Carregando informações, aguarde");
         FirebaseConfig.getFirebaseDatabase()
                 .child(Constants.UsersNode.KEY)
                 .child(loggedUser.getId())
@@ -112,11 +111,14 @@ public class FilterActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         // used only to update user number of posts on database
                         loggedUser = dataSnapshot.getValue(User.class);
-                        userIsLoaded = true;
+                        MessageHelper.closeLoadingDialog();
                     }
 
                     @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) { }
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        MessageHelper.closeLoadingDialog();
+                        MessageHelper.showLongToast("Erro ao carregar informações do usuário, não será possível publicar agora");
+                    }
                 });
     }
 
@@ -189,7 +191,7 @@ public class FilterActivity extends AppCompatActivity {
      * Method called when user clicks "check" button to post image
      */
     private void publishPost() {
-
+        MessageHelper.openLoadingDialog(this, "Carregando informações, aguarde");
         final String imageId = FirebaseConfig.getFirebaseDatabase()
                 .child(Constants.PostNode.KEY).push().getKey();
 
@@ -206,7 +208,7 @@ public class FilterActivity extends AppCompatActivity {
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                progressBarUploadImage.setVisibility(View.GONE);
+                MessageHelper.closeLoadingDialog();
                 MessageHelper.showLongToast("Erro ao fazer upload da imagem, tente novamente mais tarde");
             }
         });
@@ -233,13 +235,11 @@ public class FilterActivity extends AppCompatActivity {
                         else
                             MessageHelper.showLongToast("Erro ao fazer upload da imagem, tente novamente mais tarde");
 
-                        progressBarUploadImage.setVisibility(View.GONE);
+                        MessageHelper.closeLoadingDialog();
                     }
                 });
             }
         });
-
-
     }
 
     @Override
@@ -252,11 +252,8 @@ public class FilterActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.ic_save_post:
-                if (userIsLoaded) {
-                    progressBarUploadImage.setVisibility(View.VISIBLE);
                     publishPost();
-                } else
-                    MessageHelper.showLongToast("Aguarde o carregamento das informações essenciais");
+
                 break;
         }
         return super.onOptionsItemSelected(item);

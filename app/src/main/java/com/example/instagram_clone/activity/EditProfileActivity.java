@@ -144,12 +144,12 @@ public class EditProfileActivity extends AppCompatActivity {
         input.setTransformationMethod(PasswordTransformationMethod.getInstance()); // show as password
 
         // AlertDialog
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-        alertDialog.setTitle("Informe sua senha para realizar a alteração do email");
-        alertDialog.setView(container);
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle("Informe sua senha para realizar a alteração do email");
+        alert.setView(container);
 
 
-        alertDialog.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
+        alert.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (input.getText() != null) {
@@ -162,9 +162,9 @@ public class EditProfileActivity extends AppCompatActivity {
             }
         });
 
-        alertDialog.setNegativeButton("Cancelar", null);
-        alertDialog.create();
-        alertDialog.show();
+        alert.setNegativeButton("Cancelar", null);
+        alert.create();
+        alert.show();
     };
 
     private int dpToPixel(int dp) {

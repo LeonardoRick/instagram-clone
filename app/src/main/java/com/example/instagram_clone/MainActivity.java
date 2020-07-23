@@ -20,12 +20,14 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentTransaction;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static MainActivity mainActivity;
     private FirebaseAuth auth = FirebaseConfig.getAuth();
     private BottomNavigationViewEx bottomNavigation;
 
@@ -33,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // instance of Main Activity to finish it if uses want to log out from ProfileActivity
+        mainActivity = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -41,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
 
         initActivity();
         configBottomView();
-        defineTabReturnedFromProfileActivity();
     }
     private void configBottomView() {
         int FEED_INDEX = 0;
@@ -95,7 +98,8 @@ public class MainActivity extends AppCompatActivity {
                         fragmentTransaction.commit(); // finish fragment transaction with no action
                         Intent intent  = new Intent(getApplicationContext(), ProfileActivity.class);
                         intent.putExtra(Constants.IntentKey.SELECTED_USER, loggedUser);
-                        startActivity(intent);
+                        startActivityForResult(intent, Constants.FeatureRequest.NAV_BOTTOM_CODE);
+                        overridePendingTransition(0, 0); // Cancel transition animation
                         return true;
                     default:
                         return false;
@@ -122,25 +126,25 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * When returning from profile activity we need to set right clicked tab.
-     * We don't need to define a case to profile tab because he is comming from there
-     */
-    private void defineTabReturnedFromProfileActivity() {
-        if (getIntent().getExtras() != null) {
-            int tabId = getIntent().getExtras().getInt(Constants.IntentKey.NAV_BOTTOM);
-            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-            switch (tabId) {
-                case R.id.icHome:
-                    fragmentTransaction.replace(R.id.viewPagerFrameLayout, new FeedFragment()).commit();
-                    break;
-                case R.id.icSearch:
-                    fragmentTransaction.replace(R.id.viewPagerFrameLayout, new SearchFragment()).commit();
-                    break;
-                case R.id.icAddPicture:
-                    fragmentTransaction.replace(R.id.viewPagerFrameLayout, new PostFragment()).commit();
-                    break;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == Constants.FeatureRequest.NAV_BOTTOM_CODE) {
+                int tabId = data.getIntExtra(Constants.IntentKey.NAV_BOTTOM, R.id.icHome);
+                FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                switch (tabId) {
+                    case R.id.icHome:
+                        fragmentTransaction.replace(R.id.viewPagerFrameLayout, new FeedFragment()).commit();
+                        break;
+                    case R.id.icSearch:
+                        fragmentTransaction.replace(R.id.viewPagerFrameLayout, new SearchFragment()).commit();
+                        break;
+                    case R.id.icAddPicture:
+                        fragmentTransaction.replace(R.id.viewPagerFrameLayout, new PostFragment()).commit();
+                        break;
+                }
             }
-        };
+        }
     }
 }

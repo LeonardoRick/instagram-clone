@@ -36,6 +36,7 @@ public class Constants {
 
     public static class FollowNode {
         public static final String KEY = "follow";
+        public static final String FOLLOWER = "follower";
     }
 
     public static class PostNode  {

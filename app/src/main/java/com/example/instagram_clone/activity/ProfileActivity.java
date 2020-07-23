@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -149,7 +150,7 @@ public class ProfileActivity extends AppCompatActivity {
         configPostClickListener();
     }
     private void configInterfaceToLoggedUser() {
-        getSupportActionBar().setTitle("Perfil");
+        getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
         profileActionButton.setText("Editar Perfil");
         profileActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -255,13 +256,14 @@ public class ProfileActivity extends AppCompatActivity {
         UserHelper.updateOnDatabase(selectedUser);
     }
     /**
-     * check if selected user is followed or not by logged user
+     * check if logged user is one of the selectedUser followers to change button style and action
      */
     private void checkIfLoggedFollowSelectedUser() {
         FirebaseConfig.getFirebaseDatabase()
                 .child(Constants.FollowNode.KEY)
-                .child(loggedUser.getId())
                 .child(selectedUser.getId())
+                .child(loggedUser.getId())
+                .child(Constants.FollowNode.FOLLOWER)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -284,7 +286,9 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Change behavior of app backbutton to work like native smartphone backbutton
+     * Change behavior of app back button to just finish activity
+     * We don't have a back button on screen when it's logged user profile, so this
+     * method purpose is to work only on friends profiles (Other users)
      */
     @Override
     public boolean onSupportNavigateUp() {
@@ -313,18 +317,46 @@ public class ProfileActivity extends AppCompatActivity {
      * To main activity with right id
      */
     private void enableNavigation(BottomNavigationViewEx viewEx) {
+
+        viewEx.setSelectedItemId(R.id.icProfile);
         viewEx.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                if (item.getItemId() == R.id.icProfile) return false;
+                if (item.getItemId() == R.id.icProfile)  return false;
                 else {
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    Intent intent = new Intent();
                     intent.putExtra(Constants.IntentKey.NAV_BOTTOM, item.getItemId());
-                    startActivity(intent);
+                    setResult(RESULT_OK, intent);
                     finish();
+                    overridePendingTransition(0,0);
                     return true;
                 }
             };
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    /**
+     * Make sure to finish main activity even if it's possibly already finished
+     * User may wan't to logout when inside a friend profile. As is not possible to
+     * Hide drop-down menu when user is in a friend profile (and show it only on his profile,
+     * We can't override this method conditionally), we need to make sure that main activity
+     * Is beind finished when he loges out from there
+     */
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menuLogOut:
+                FirebaseConfig.getAuth().signOut();
+                MainActivity.mainActivity.finish();
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
