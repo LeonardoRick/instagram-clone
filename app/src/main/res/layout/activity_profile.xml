@@ -143,6 +143,7 @@
         android:numColumns="3"
         app:layout_constraintBottom_toTopOf="@+id/profileBottomNavLinearLayout"
         app:layout_constraintEnd_toEndOf="parent"
+        android:stackFromBottom="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 

@@ -1,28 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.example.instagram_clone.utils.SquareImageView
-        android:id="@+id/imageViewPost"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/profile"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ProgressBar
-        android:id="@+id/progressBarGridPost"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@+id/imageViewPost"
-        app:layout_constraintEnd_toEndOf="@+id/imageViewPost"
-        app:layout_constraintStart_toStartOf="@+id/imageViewPost"
-        app:layout_constraintTop_toTopOf="@+id/imageViewPost" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_margin="16dp"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/postInfoProfileImage"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/profile"/>
+            <TextView
+                android:id="@+id/postInfoProfileName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginStart="16dp"
+                android:text="Nome do usuário"/>
+        </LinearLayout>
+
+        <com.example.instagram_clone.utils.SquareImageView
+            android:id="@+id/postInfoImageView"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:src="@drawable/profile"/>
+
+        <TextView
+            android:layout_marginTop="8dp"
+            android:id="@+id/postInfoLikes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="0 curtidas"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_marginTop="8dp"
+            android:id="@+id/postInfoDesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Legenda"/>
+        <TextView
+            android:layout_marginTop="8dp"
+            android:id="@+id/postInfoViewComments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Visualizar comentários..."/>
+    </LinearLayout>
+</LinearLayout>

@@ -1,7 +1,6 @@
 package com.example.instagram_clone.activity;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -10,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,7 +43,7 @@ import com.zomato.photofilters.utils.ThumbnailsManager;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FilterActivity extends AppCompatActivity {
+public class PostActivity extends AppCompatActivity {
 
     static { System.loadLibrary("NativeImageProcessor"); }
 
@@ -51,8 +51,7 @@ public class FilterActivity extends AppCompatActivity {
     private Bitmap filteredImage;
     private List<ThumbnailItem> thumbnailsList = new ArrayList<>();
     private User loggedUser;
-    private boolean userIsLoaded = false;
-
+    private List<String> followersId = new ArrayList<>();
     private RecyclerView recyclerFilters;
     private ThumbnailAdapter adapter;
 
@@ -80,7 +79,8 @@ public class FilterActivity extends AppCompatActivity {
 
         configRecyclerView();
         recoverSelectedImageInfo();
-        recoverSelectedUserCountPostsInfo();
+        recoverLoggedUserCompleteInfo();
+
     }
 
     private void recoverSelectedImageInfo() {
@@ -98,10 +98,12 @@ public class FilterActivity extends AppCompatActivity {
     }
 
     /**
-     * Method used to recover logged user info with
-     * only the purpose of update post number
+     * Method used to recover complete info of user.
+     * UserHelper.getLogged() returns only Firebase Auth info of user
+     * (like image, name, email and password). This method is used to
+     * recover the rest of info we saved about the user on the databse
      */
-    private void recoverSelectedUserCountPostsInfo() {
+    private void recoverLoggedUserCompleteInfo() {
         MessageHelper.openLoadingDialog(this, "Carregando informações, aguarde");
         FirebaseConfig.getFirebaseDatabase()
                 .child(Constants.UsersNode.KEY)
@@ -111,7 +113,8 @@ public class FilterActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         // used only to update user number of posts on database
                         loggedUser = dataSnapshot.getValue(User.class);
-                        MessageHelper.closeLoadingDialog();
+                        recoverFollowersInfo();
+
                     }
 
                     @Override
@@ -122,7 +125,41 @@ public class FilterActivity extends AppCompatActivity {
                 });
     }
 
-    public void recoverFiltersList() {
+
+    /**
+     * Recover Followers of logged user so we can save his new post
+     * os their feeds
+     * expected return on dataSnapshot:
+     * <id follower>
+     *     follower : true
+     */
+    private void recoverFollowersInfo () {
+        FirebaseConfig.getFirebaseDatabase()
+                .child(Constants.FollowNode.KEY)
+                .child(loggedUser.getId())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if(dataSnapshot.exists()) {
+                            for (DataSnapshot follower: dataSnapshot.getChildren())
+                                followersId.add(follower.getKey());
+                        }
+
+                        MessageHelper.closeLoadingDialog();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        MessageHelper.closeLoadingDialog();
+                    }
+                });
+    }
+
+    /**
+     * Method called to create list o filters that will be showed
+     * for user to select filter of his picture
+     */
+    private void recoverFiltersList() {
         ThumbnailsManager.clearThumbs();
         thumbnailsList.clear();
 
@@ -219,7 +256,7 @@ public class FilterActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Uri uri) {
 
-                        Post post = new Post();
+                        final Post post = new Post();
                         post.setId(imageId);
                         post.setUserId(loggedUser.getId());
                         post.setImagePath(uri.toString());
@@ -227,8 +264,11 @@ public class FilterActivity extends AppCompatActivity {
                             post.setDesc(imageDesc.getText().toString());
 
                         loggedUser.incrementCountPosts();
-                        if (PostHelper.saveOnDatabase(post)
-                                &&UserHelper.updateOnDatabase(loggedUser)) {
+                        if (PostHelper.saveOnDatabase(post, followersId)
+                                && UserHelper.updateOnDatabase(loggedUser)) {
+
+
+
                             MessageHelper.showLongToast("Sucesso ao fazer upload da imagem");
                             finish();
                         }

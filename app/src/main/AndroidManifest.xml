@@ -35,7 +35,7 @@
             android:name=".activity.EditProfileActivity"
             android:parentActivityName=".activity.ProfileActivity" />
         <activity
-            android:name=".activity.FilterActivity"
+            android:name=".activity.PostActivity"
             android:parentActivityName=".MainActivity" />
     </application>
 

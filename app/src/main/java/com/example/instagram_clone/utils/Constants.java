@@ -6,6 +6,8 @@ public class Constants {
         public static final int STORAGE = 10;
         public static final int CAMERA = 20;
         public static final int SETTINGS = 30;
+
+        public static final int NAV_BOTTOM_CODE = 100;
     }
 
     public static class IntentKey {
@@ -41,5 +43,9 @@ public class Constants {
 
     public static class PostNode  {
         public static final String KEY = "posts";
+    }
+
+    public static class FeedNode {
+        public static final String KEY = "feed";
     }
 }

@@ -23,7 +23,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.example.instagram_clone.R;
-import com.example.instagram_clone.activity.FilterActivity;
+import com.example.instagram_clone.activity.PostActivity;
 import com.example.instagram_clone.utils.Constants;
 import com.example.instagram_clone.utils.BitmapHelper;
 
@@ -189,7 +189,7 @@ public class PostFragment extends Fragment {
     }
 
     private void startFilterActivity(Uri imageUri) {
-        Intent intent = new Intent(getActivity(), FilterActivity.class);
+        Intent intent = new Intent(getActivity(), PostActivity.class);
         intent.putExtra(Constants.IntentKey.SELECTED_IMAGE, imageUri.toString());
         startActivity(intent);
     }

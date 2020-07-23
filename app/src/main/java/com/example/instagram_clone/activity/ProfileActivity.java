@@ -8,7 +8,6 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,6 +34,7 @@ import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ProfileActivity extends AppCompatActivity {
@@ -189,7 +189,7 @@ public class ProfileActivity extends AppCompatActivity {
      * Config grid adapter to show posts of user as grid
      */
     private void configGridView(List<String> postsUrl) {
-        gripAdapter = new GridAdapter(getApplicationContext(), R.layout.post, postsUrl);
+        gripAdapter = new GridAdapter(getApplicationContext(), R.layout.post_list_item, postsUrl);
         gridView.setAdapter(gripAdapter);
     }
     /**
@@ -208,8 +208,9 @@ public class ProfileActivity extends AppCompatActivity {
                                 Post post = data.getValue(Post.class);
                                 postsList.add(post);
                                 postsUrl.add(post.getImagePath());
-                                Log.d("TAG", "onDataChange: " + post.getImagePath());
                             }
+                            Collections.reverse(postsList);
+                            Collections.reverse(postsUrl);
                             configGridView(postsUrl);
                         }
                     }
