@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.example.instagram_clone.utils.Constants;
 import com.example.instagram_clone.utils.FirebaseConfig;
-import com.google.firebase.database.DatabaseReference;
 
 import java.util.HashMap;
 import java.util.List;
@@ -58,18 +57,53 @@ public class PostHelper {
         }
     }
 
-    public static boolean savePostOnFollowersFeed(Post post, List<String> followersId) {
-        try {
-            DatabaseReference feedRef = FirebaseConfig.getFirebaseDatabase().child(Constants.FeedNode.KEY);
-            for (String id : followersId)
-                feedRef.child(id)
-                        .child(post.getId());
+    private boolean updateLikesOnDatabase(final Post post, final List<String> followersId) {
 
+        final Map<String, Object> postMap = convertPostToMap(post);
+        try {
+            FirebaseConfig.getFirebaseDatabase()
+                    .child(Constants.PostNode.KEY)
+                    .child(post.getUserId())
+                    .child(post.getId())
+                    .updateChildren(postMap);
+
+            // saving feed info on new thread because user can have a lot of followers
+            // and we don't want to lose performance on this process
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    for (String follower : followersId)
+                        FirebaseConfig.getFirebaseDatabase()
+                                .child(Constants.FeedNode.KEY)
+                                .child(follower)
+                                .child(post.getId())
+                                .updateChildren(postMap);
+                }
+            }).start();
             return true;
-        } catch (Exception e) {
-            Log.e(TAG, "savePostOnFollowersFeed" + e.getMessage());
+        } catch(Exception e) {
+            Log.e(TAG, "saveOnDatabase: " + e.getMessage() );
             return false;
         }
+    }
+
+    /**
+     * @param post to be converted to hashMap to firebase .updateChildren() accepts
+     * @return Map<String, Object> where Object is user info
+     */
+    public static Map<String, Object> convertPostToMap(Post post) {
+        Map<String, Object> userMap = new HashMap<>();
+
+        if (post.getId() != null) userMap.put(Constants.PostNode.ID, post.getId());
+        if (post.getUserId() != null) userMap.put(Constants.PostNode.USER_ID, post.getUserId());
+        if (post.getDesc() != null) userMap.put(Constants.PostNode.DESC, post.getDesc());
+        if (post.getImagePath() != null) userMap.put(Constants.PostNode.IMAGE_PATH, post.getImagePath());
+
+        userMap.put(Constants.PostNode.LIKES, post.getLikes());
+        userMap.put(Constants.PostNode.USERS_WHO_LIKED, post.getUsersWhoLiked());
+
+
+        return userMap;
     }
 
 }

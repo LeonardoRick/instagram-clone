@@ -6,6 +6,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.instagram_clone.R;
@@ -13,6 +14,7 @@ import com.example.instagram_clone.model.post.Post;
 import com.example.instagram_clone.model.user.User;
 import com.example.instagram_clone.utils.Constants;
 import com.example.instagram_clone.utils.SquareImageView;
+import com.like.LikeButton;
 import com.squareup.picasso.Picasso;
 
 public class PostInfoActivity extends AppCompatActivity {
@@ -20,6 +22,8 @@ public class PostInfoActivity extends AppCompatActivity {
     private CircleImageView postInfoProfileImage;
     private TextView postInfoProfileName, postInfoLikes, postInfoDesc;
     private SquareImageView postInfoImageView;
+    private LikeButton likeButton;
+    private ImageView commentButton;
 
     private User selectedUser;
     private Post selectedPost;
@@ -45,6 +49,9 @@ public class PostInfoActivity extends AppCompatActivity {
         postInfoDesc = findViewById(R.id.postInfoDesc);
         postInfoImageView = findViewById(R.id.postInfoImageView);
 
+        likeButton = findViewById(R.id.likeButton);
+        commentButton = findViewById(R.id.commentButton);
+
         recoverIntentInfo();
     }
 
@@ -63,6 +70,8 @@ public class PostInfoActivity extends AppCompatActivity {
             postInfoDesc.setText(selectedPost.getDesc());
             Picasso.get().load(Uri.parse(selectedPost.getImagePath()))
                     .into(postInfoImageView);
+
+            postInfoLikes.setText(selectedPost.getLikes() + Constants.Labels.LIKES);
         }
     }
 

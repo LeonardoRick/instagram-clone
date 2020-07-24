@@ -122,9 +122,9 @@ public class SearchFragment extends Fragment {
         if (text.length() > 1) {
             Query query = FirebaseConfig.getFirebaseDatabase()
                     .child(Constants.UsersNode.KEY)
-                    .orderByChild(Constants.UsersNode.NAME)
-                    .startAt(text)
-                    .endAt(text + "\uf8ff");
+                    .orderByChild(Constants.UsersNode.NAME_TO_SEARCH)
+                    .startAt(text.toLowerCase())
+                    .endAt(text.toLowerCase() + "\uf8ff");
 
             query.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override

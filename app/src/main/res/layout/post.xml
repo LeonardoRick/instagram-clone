@@ -1,7 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_marginTop="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="horizontal">
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/postInfoProfileImage"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/profile"/>
+        <TextView
+            android:id="@+id/postInfoProfileName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginStart="16dp"
+            android:text="Nome do usuário"/>
+    </LinearLayout>
+
+    <com.example.instagram_clone.utils.SquareImageView
+        android:id="@+id/postInfoImageView"
+        android:layout_width="match_parent"
+        android:scaleType="centerCrop"
+        android:layout_height="80dp"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/profile"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -10,31 +43,21 @@
         android:orientation="vertical">
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/postInfoProfileImage"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:src="@drawable/profile"/>
-            <TextView
-                android:id="@+id/postInfoProfileName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginStart="16dp"
-                android:text="Nome do usuário"/>
-        </LinearLayout>
+            android:layout_height="wrap_content">
+            <com.like.LikeButton
+                android:id="@+id/likeButton"
+                app:icon_type="heart"
+                app:icon_size="20dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"/>
 
-        <com.example.instagram_clone.utils.SquareImageView
-            android:id="@+id/postInfoImageView"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:src="@drawable/profile"/>
+            <ImageView
+                android:id="@+id/commentButton"
+                android:layout_marginLeft="16dp"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@drawable/comment"/>
+        </LinearLayout>
 
         <TextView
             android:layout_marginTop="8dp"
@@ -50,11 +73,5 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Legenda"/>
-        <TextView
-            android:layout_marginTop="8dp"
-            android:id="@+id/postInfoViewComments"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Visualizar comentários..."/>
     </LinearLayout>
 </LinearLayout>

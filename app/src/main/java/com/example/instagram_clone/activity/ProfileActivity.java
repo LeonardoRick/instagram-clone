@@ -42,11 +42,13 @@ public class ProfileActivity extends AppCompatActivity {
     private User selectedUser;
     private User loggedUser;
     private boolean isFollowed = false;
+    private Integer numberFollowers;
 
-    private TextView numberPosts, numberFollowers, numberFollowing;
+    private TextView labelNumberPosts, labelNumberFollowers, labelNumberFollowing;
     private Button profileActionButton;
     private CircleImageView profileImage;
     private BottomNavigationViewEx profileBottomNavigation;
+
 
     private GridView gridView;
     private GridAdapter gripAdapter;
@@ -62,16 +64,26 @@ public class ProfileActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
-        loggedUser = UserHelper.getLogged();
-
         initViewElements();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        recoverSelectedUserInfo();
+
+        UserHelper.getLoggedCompleteInfo()
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        loggedUser = dataSnapshot.getValue(User.class);
+                        recoverBasicSelectedUserInfo();
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) { }
+                });
+
     }
 
     @Override
@@ -84,23 +96,23 @@ public class ProfileActivity extends AppCompatActivity {
         profileImage = findViewById(R.id.circleImageViewProfile);
         profileActionButton = findViewById(R.id.profileActionButton);
         gridView = findViewById(R.id.gridView);
-        numberPosts = findViewById(R.id.numberPosts);
-        numberFollowers = findViewById(R.id.numberFollowers);
-        numberFollowing = findViewById(R.id.numberFollowing);
+        labelNumberPosts = findViewById(R.id.numberPosts);
+        labelNumberFollowers = findViewById(R.id.numberFollowers);
+        labelNumberFollowing = findViewById(R.id.numberFollowing);
         profileBottomNavigation = findViewById(R.id.profileBottomNav);
     }
 
     /**
      * recover selected user info to build his profile page
      */
-    private void recoverSelectedUserInfo() {
+    private void recoverBasicSelectedUserInfo() {
         Bundle bundle = getIntent().getExtras();
         if (bundle.containsKey(Constants.IntentKey.SELECTED_USER)) {
             selectedUser = (User) bundle.getSerializable(Constants.IntentKey.SELECTED_USER);
             // Using listener only to user numbers, so other info will be showed faster
-            setUserNumbersListener();
+            recoverCompleteSelectedUserInfo();
 
-            configInterface();
+
 
             if (selectedUser.getImagePath() != null) {
                 Uri uri = Uri.parse(selectedUser.getImagePath());
@@ -115,7 +127,7 @@ public class ProfileActivity extends AppCompatActivity {
      * Listener to update posts, followers and following info about user,
      * So it can be updated instantaneously when user makes an action
      */
-    private void setUserNumbersListener() {
+    private void recoverCompleteSelectedUserInfo() {
         selectedUserRef = FirebaseConfig.getFirebaseDatabase()
                 .child(Constants.UsersNode.KEY)
                 .child(selectedUser.getId());
@@ -124,10 +136,10 @@ public class ProfileActivity extends AppCompatActivity {
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        User user = dataSnapshot.getValue(User.class);
-                        numberPosts.setText(String.valueOf(user.getCountPosts()));
-                        numberFollowers.setText(String.valueOf(user.getCountFollowers()));
-                        numberFollowing.setText(String.valueOf(user.getCountFollowing()));
+                        selectedUser = dataSnapshot.getValue(User.class);
+                        // here we have both logged user and selectedUser info
+                        // so we can build interface values
+                        configInterface();
                     }
 
                     @Override
@@ -142,6 +154,10 @@ public class ProfileActivity extends AppCompatActivity {
      * like "follow button" being "edit profile" not allowing him to follow himself
      */
     private void configInterface() {
+        labelNumberPosts.setText(String.valueOf(selectedUser.getCountPosts()));
+        labelNumberFollowers.setText(String.valueOf(selectedUser.getCountFollowers()));
+        labelNumberFollowing.setText(String.valueOf(selectedUser.getCountFollowing()));
+
         if (selectedUser.getId().equals(loggedUser.getId()))
             configInterfaceToLoggedUser();
         else
@@ -174,12 +190,14 @@ public class ProfileActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // if is following, we unfollow when user clicks the button
                 if (isFollowed) {
-                    if (FollowHelper.unfollow(selectedUser))
-                        updateNumbers(false);
-                } else {
-                    if (FollowHelper.follow(selectedUser))
-                        updateNumbers(true);
+                    FollowHelper.unfollow(selectedUser);
+                    isFollowed = false;
                 }
+                else {
+                    FollowHelper.follow(selectedUser);
+                    isFollowed = true;
+                }
+                updateNumbers(isFollowed);
                 checkIfLoggedFollowSelectedUser();
             }
         });
@@ -236,13 +254,13 @@ public class ProfileActivity extends AppCompatActivity {
     /**
      * Update numbers following and followers on loggedUser and selectedUser when
      * loggedUser follow or unfollow selectedUser
-     * @param isFollowAction to check if is a follow or unfollow action
+     * @param isFollowed to check userIs followed
      */
-    private void updateNumbers(boolean isFollowAction) {
+    private void updateNumbers(boolean isFollowed) {
         int countLoggedFollowing = loggedUser.getCountFollowing();
         int countSelectedUserFollowers = selectedUser.getCountFollowers();
 
-        if (isFollowAction) {
+        if (isFollowed) {
             countLoggedFollowing++;
             countSelectedUserFollowers++;
         } else { // if its not a follow action, it's a unfollow action

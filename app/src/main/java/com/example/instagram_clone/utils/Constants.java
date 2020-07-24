@@ -2,6 +2,10 @@ package com.example.instagram_clone.utils;
 
 public class Constants {
 
+    public static class Labels {
+        public static final String LIKES = " curtidas";
+    }
+
     public static class FeatureRequest {
         public static final int STORAGE = 10;
         public static final int CAMERA = 20;
@@ -29,8 +33,9 @@ public class Constants {
         public static final String KEY = "users";
         public static final String ID = "id";
         public static final String NAME = "name";
+        public static final String NAME_TO_SEARCH = "nameToSearch";
         public static final String EMAIL = "email";
-        public static final String PICTURE_PATH = "picturePath";
+        public static final String IMAGE_PATH = "imagePath";
         public static final String COUNT_POSTS = "countPosts";
         public static final String COUNT_FOLLOWERS = "countFollowers";
         public static final String COUNT_FOLLOWING = "countFollowing";
@@ -43,6 +48,12 @@ public class Constants {
 
     public static class PostNode  {
         public static final String KEY = "posts";
+        public static final String ID = "id";
+        public static final String USER_ID = "userId";
+        public static final String DESC = "desc";
+        public static final String IMAGE_PATH = "imagePath";
+        public static final String LIKES = "likes";
+        public static final String USERS_WHO_LIKED = "usersWhoLiked";
     }
 
     public static class FeedNode {

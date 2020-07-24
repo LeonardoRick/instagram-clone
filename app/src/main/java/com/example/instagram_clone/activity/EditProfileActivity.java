@@ -327,14 +327,12 @@ public class EditProfileActivity extends AppCompatActivity {
                     break;
                 }
 
-                if (image != null)
-                    saveImage(image);
-
+                if (image != null) saveImage(image);
             } catch (Exception e) {
                 progressBar.setVisibility(View.GONE);
                 e.printStackTrace();
             }
-        }
+        } else progressBar.setVisibility(View.GONE);
     }
     /* **************** END - Process of updating profile image  **************** */
 }

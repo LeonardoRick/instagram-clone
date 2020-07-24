@@ -12,13 +12,14 @@ public class User implements Serializable {
 
     private String id;
     private String name;
+    private String nameToSearch;
     private String email;
     private String password;
     private String imagePath;
 
-    private int countPosts = 0;
-    private int countFollowers = 0;
-    private int countFollowing = 0;
+    private Integer countPosts;
+    private Integer countFollowers;
+    private Integer countFollowing;
 
     public User() {}
 
@@ -28,6 +29,7 @@ public class User implements Serializable {
     public User (String id, String name, String email, Uri picture) {
         this.id = id;
         this.name = name;
+        if (name != null) this.nameToSearch = name.toLowerCase();
         this.email = email;
         if (picture != null)
             this.imagePath = picture.toString();
@@ -39,12 +41,14 @@ public class User implements Serializable {
 
     public User(String name, String email, String password) {
         this.name = name;
+        this.nameToSearch = name.toLowerCase();
         this.email = email;
         this.password = password;
     }
 
     public void incrementCountPosts() {
-        this.countPosts++;
+        if (countPosts == null) countPosts = 1;
+        else countPosts++;
     }
     /********* getters and setters *******/
 
@@ -54,11 +58,13 @@ public class User implements Serializable {
 
     public String getEmail() { return email; }
 
-    public int getCountPosts() { return countPosts; }
+    public Integer getCountPosts() { return countPosts; }
 
-    public int getCountFollowers() { return countFollowers; }
+    public Integer getCountFollowers() { return countFollowers; }
 
-    public int getCountFollowing() { return countFollowing; }
+    public Integer getCountFollowing() { return countFollowing; }
+
+    public String getNameToSearch() { return nameToSearch; }
 
     @Exclude
     public String getPassword() { return password; }
@@ -67,7 +73,10 @@ public class User implements Serializable {
 
     public void setId(String id) { this.id = id;}
 
-    public void setName(String name) { this.name = name; }
+    public void setName(String name) {
+        this.name = name;
+        this.nameToSearch = name.toLowerCase();
+    }
 
     public void setEmail(String email) { this.email = email; }
 
@@ -75,9 +84,9 @@ public class User implements Serializable {
 
     public void setImagePath(String imagePath) {this.imagePath = imagePath; }
 
-    public void setCountPosts(int countPosts) { this.countPosts = countPosts; }
+    public void setCountPosts(Integer countPosts) { this.countPosts = countPosts; }
 
-    public void setCountFollowers(int countFollowers) { this.countFollowers = countFollowers; }
+    public void setCountFollowers(Integer countFollowers) { this.countFollowers = countFollowers; }
 
-    public void setCountFollowing(int countFollowing) { this.countFollowing = countFollowing; }
+    public void setCountFollowing(Integer countFollowing) { this.countFollowing = countFollowing; }
 }

@@ -69,4 +69,10 @@ public class GridAdapter extends ArrayAdapter<String> {
         private ImageView image;
         private ProgressBar progressBar;
     }
+
+    @Nullable
+    @Override
+    public String getItem(int position) {
+        return super.getItem(position);
+    }
 }

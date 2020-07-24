@@ -13,6 +13,8 @@ import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,12 +40,37 @@ public class UserHelper {
     }
 
     /**
-     * Sve user on database within his id
+     * User when you need to recover more info from user
+     * than firebase auth provides (name, email, image);
+     *
+     * If you want to recover number of followers, for example
+     * you need to recover this complete info from user
+     *
+     * add a value event listener to recover info
+     * @return user;
+     */
+    public static DatabaseReference getLoggedCompleteInfo() {
+       try {
+           return FirebaseConfig.getFirebaseDatabase()
+                   .child(Constants.UsersNode.KEY)
+                   .child(getLogged().getId());
+       } catch (Exception e) {
+           return null;
+       }
+    };
+
+    /**
+     * Save user on database within his id.
+     * Used only creating user o RegisterActivity
      * @param user
      * @return boolean to control success of operations
      */
     public static boolean saveOnDatabase(User user) {
         try {
+            user.setCountPosts(0);
+            user.setCountFollowers(0);
+            user.setCountFollowing(0);
+
             FirebaseConfig.getFirebaseDatabase()
                     .child(Constants.UsersNode.KEY)
                     .child(user.getId())
@@ -82,13 +109,16 @@ public class UserHelper {
         Map<String, Object> userMap = new HashMap<>();
 
         if (user.getId() != null) userMap.put(Constants.UsersNode.ID, user.getId());
-        if (user.getName() != null) userMap.put(Constants.UsersNode.NAME, user.getName());
-        if (user.getEmail() != null) userMap.put(Constants.UsersNode.EMAIL, user.getEmail());
-        if (user.getImagePath() != null) userMap.put(Constants.UsersNode.PICTURE_PATH, user.getImagePath());
+        if (user.getName() != null) {
+            userMap.put(Constants.UsersNode.NAME, user.getName());
+            userMap.put(Constants.UsersNode.NAME_TO_SEARCH, user.getName().toLowerCase());
+        };
 
-        userMap.put(Constants.UsersNode.COUNT_POSTS, user.getCountPosts());
-        userMap.put(Constants.UsersNode.COUNT_FOLLOWERS, user.getCountFollowers());
-        userMap.put(Constants.UsersNode.COUNT_FOLLOWING, user.getCountFollowing());
+        if (user.getEmail() != null) userMap.put(Constants.UsersNode.EMAIL, user.getEmail());
+        if (user.getImagePath() != null) userMap.put(Constants.UsersNode.IMAGE_PATH, user.getImagePath());
+        if (user.getCountPosts() != null) userMap.put(Constants.UsersNode.COUNT_POSTS, user.getCountPosts());
+        if (user.getCountFollowers() != null)userMap.put(Constants.UsersNode.COUNT_FOLLOWERS, user.getCountFollowers());
+        if (user.getCountFollowing() != null) userMap.put(Constants.UsersNode.COUNT_FOLLOWING, user.getCountFollowing());
         return userMap;
     }
 

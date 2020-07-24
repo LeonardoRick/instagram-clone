@@ -21,6 +21,7 @@
             <ImageView
                 android:id="@+id/selectedImageView"
                 android:layout_width="match_parent"
+                android:scaleType="centerCrop"
                 android:layout_height="350dp"
                 android:src="@drawable/profile" />
             <com.google.android.material.textfield.TextInputLayout

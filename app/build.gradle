@@ -52,4 +52,8 @@ dependencies {
 
     // AndroidPhotoFilters
     implementation 'info.androidhive:imagefilters:1.0.7'
+
+    // LikeButton
+    implementation 'com.github.jd-alexander:LikeButton:0.2.3'
+
 }
