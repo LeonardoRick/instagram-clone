@@ -113,12 +113,14 @@ public class UserHelper {
             userMap.put(Constants.UsersNode.NAME, user.getName());
             userMap.put(Constants.UsersNode.NAME_TO_SEARCH, user.getName().toLowerCase());
         };
-
         if (user.getEmail() != null) userMap.put(Constants.UsersNode.EMAIL, user.getEmail());
         if (user.getImagePath() != null) userMap.put(Constants.UsersNode.IMAGE_PATH, user.getImagePath());
+        
         if (user.getCountPosts() != null) userMap.put(Constants.UsersNode.COUNT_POSTS, user.getCountPosts());
         if (user.getCountFollowers() != null)userMap.put(Constants.UsersNode.COUNT_FOLLOWERS, user.getCountFollowers());
         if (user.getCountFollowing() != null) userMap.put(Constants.UsersNode.COUNT_FOLLOWING, user.getCountFollowing());
+        
+        if (user.getFollowersId() != null) userMap.put(Constants.UsersNode.FOLLOWERS_ID, user.getFollowersId());
         return userMap;
     }
 

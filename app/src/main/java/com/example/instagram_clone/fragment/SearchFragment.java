@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.instagram_clone.R;
 import com.example.instagram_clone.activity.EditProfileActivity;
@@ -36,6 +37,7 @@ public class SearchFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private SearchView searchView;
+    private TextView tipTextView;
 
     private List<User> usersList = new ArrayList<>();
     private UserAdapter adapter;
@@ -60,6 +62,7 @@ public class SearchFragment extends Fragment {
 
     private void initViewElements(View view) {
         recyclerView = view.findViewById(R.id.recyclerViewSearch);
+        tipTextView = view.findViewById(R.id.tipTextView);
         searchView = view.findViewById(R.id.searchView);
         searchView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,6 +101,7 @@ public class SearchFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                tipTextView.setVisibility(View.GONE);
                 searchUsers(newText);
                 return true;
             }
@@ -110,6 +114,7 @@ public class SearchFragment extends Fragment {
                 usersList.clear();
                 adapter.notifyDataSetChanged();
                 searchView.onActionViewCollapsed();
+                tipTextView.setVisibility(View.VISIBLE);
             }
         });
     }

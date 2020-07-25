@@ -10,17 +10,26 @@ public class Post implements Serializable {
     private String desc;
     private String imagePath;
     private String userId;
-    private int likes = 0;
+    private Integer likes = 0;
 
-    private List<String> usersWhoLiked = new ArrayList<>();
-
-
+    private List<String> usersWhoLiked;
 
     public Post() {}
 
+    public void addLike(String whoLikedId) {
+        if (usersWhoLiked == null) usersWhoLiked = new ArrayList<>();
+        usersWhoLiked.add(whoLikedId);
 
-    public void addLike() {
-        likes++;
+        if (likes == null) likes = 1;
+        else likes++;
+    }
+
+    public void removeLike(String whoDislikedId) {
+        if (usersWhoLiked == null) usersWhoLiked = new ArrayList<>();
+        usersWhoLiked.remove(whoDislikedId);
+
+        if (likes == null) likes = 1;
+        else likes--;
     }
 
     public void removeLike() {
@@ -31,7 +40,7 @@ public class Post implements Serializable {
     public String getDesc() { return desc; }
     public String getImagePath() { return imagePath; }
     public String getUserId() { return userId; }
-    public int getLikes() { return likes; }
+    public Integer getLikes() { return likes; }
     public List<String> getUsersWhoLiked() { return usersWhoLiked; }
 
 
@@ -39,6 +48,6 @@ public class Post implements Serializable {
     public void setDesc(String desc) { this.desc = desc; }
     public void setImagePath(String imagePath) { this.imagePath = imagePath; }
     public void setUserId(String userId) { this.userId = userId; }
-    public void setLikes(int likes) { this.likes = likes; }
+    public void setLikes(Integer likes) { this.likes = likes; }
     public void setUsersWhoLiked(List<String> usersWhoLiked) { this.usersWhoLiked = usersWhoLiked; }
 }

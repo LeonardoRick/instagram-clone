@@ -32,7 +32,7 @@ public class MessageHelper {
      */
     public static void openLoadingDialog(Activity activity, String title) {
         AlertDialog.Builder alert = new AlertDialog.Builder(activity);
-        alert.setTitle("Aguarde, carregando");
+        alert.setTitle(title);
         alert.setCancelable(false);
         alert.setView(R.layout.loading);
         alertDialog = alert.create();

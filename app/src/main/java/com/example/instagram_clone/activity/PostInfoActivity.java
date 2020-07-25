@@ -1,20 +1,30 @@
 package com.example.instagram_clone.activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.instagram_clone.R;
 import com.example.instagram_clone.model.post.Post;
+import com.example.instagram_clone.model.post.PostHelper;
 import com.example.instagram_clone.model.user.User;
+import com.example.instagram_clone.model.user.UserHelper;
 import com.example.instagram_clone.utils.Constants;
+import com.example.instagram_clone.utils.FirebaseConfig;
 import com.example.instagram_clone.utils.SquareImageView;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.like.LikeButton;
+import com.like.OnLikeListener;
 import com.squareup.picasso.Picasso;
 
 public class PostInfoActivity extends AppCompatActivity {
@@ -26,7 +36,11 @@ public class PostInfoActivity extends AppCompatActivity {
     private ImageView commentButton;
 
     private User selectedUser;
+    private User loggedUser;
     private Post selectedPost;
+
+    private DatabaseReference postRef;
+    private ValueEventListener valueEventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,8 +52,20 @@ public class PostInfoActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Post");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true); // Enable back button;
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_black); // Changes back button icon
-
+        loggedUser = UserHelper.getLogged();
         initViewElements();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        postListener();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (valueEventListener != null) postRef.removeEventListener(valueEventListener);
     }
 
     private void initViewElements() {
@@ -50,9 +76,11 @@ public class PostInfoActivity extends AppCompatActivity {
         postInfoImageView = findViewById(R.id.postInfoImageView);
 
         likeButton = findViewById(R.id.likeButton);
+        likeButton.setEnabled(false);
         commentButton = findViewById(R.id.commentButton);
 
         recoverIntentInfo();
+        setLikeListener();
     }
 
     private void recoverIntentInfo() {
@@ -75,6 +103,58 @@ public class PostInfoActivity extends AppCompatActivity {
         }
     }
 
+
+
+    private void setLikeListener() {
+        if (selectedPost.getUsersWhoLiked() != null) {
+            if (selectedPost.getUsersWhoLiked().contains(loggedUser.getId())) {
+                likeButton.setLiked(true);
+            }
+        }
+        likeButton.setEnabled(true);
+        likeButton.setOnLikeListener(new OnLikeListener() {
+            @Override
+            public void liked(LikeButton likeButton) {
+                selectedPost.addLike(loggedUser.getId());
+                PostHelper.updateOnDatabase(selectedPost, selectedUser.getFollowersId());
+            }
+
+            @Override
+            public void unLiked(LikeButton likeButton) {
+                selectedPost.removeLike(loggedUser.getId());
+                PostHelper.updateOnDatabase(selectedPost, selectedUser.getFollowersId());
+            }
+        });
+    }
+
+    /**
+     * listener to update on realtime posts
+     */
+    private void postListener() {
+        postRef = FirebaseConfig.getFirebaseDatabase()
+                .child(Constants.PostNode.KEY)
+                .child(selectedUser.getId())
+                .child(selectedPost.getId());
+
+        valueEventListener = postRef
+            .addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+
+                        selectedPost = dataSnapshot.getValue(Post.class);
+                        Log.d("TAG", "onDataChange: " + selectedPost.getLikes());
+                        postInfoLikes.setText(selectedPost.getLikes() + Constants.Labels.LIKES);
+
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+    }
     @Override
     public boolean onSupportNavigateUp() {
         finish();

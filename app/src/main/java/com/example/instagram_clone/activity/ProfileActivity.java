@@ -1,10 +1,12 @@
 package com.example.instagram_clone.activity;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,11 +22,13 @@ import com.example.instagram_clone.MainActivity;
 import com.example.instagram_clone.R;
 import com.example.instagram_clone.adapter.GridAdapter;
 import com.example.instagram_clone.model.post.Post;
+import com.example.instagram_clone.model.post.PostHelper;
 import com.example.instagram_clone.utils.FollowHelper;
 import com.example.instagram_clone.model.user.User;
 import com.example.instagram_clone.model.user.UserHelper;
 import com.example.instagram_clone.utils.Constants;
 import com.example.instagram_clone.utils.FirebaseConfig;
+import com.example.instagram_clone.utils.MessageHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -89,7 +93,8 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        selectedUserRef.removeEventListener(valueEventListener);
+        if (valueEventListener != null)
+            selectedUserRef.removeEventListener(valueEventListener);
     }
 
     private void initViewElements() {
@@ -174,10 +179,11 @@ public class ProfileActivity extends AppCompatActivity {
                 startActivity(new Intent(getApplicationContext(), EditProfileActivity.class));
             }
         });
-
+        configLongClickToDeletePostListener();
         configBottomNavigation();
     }
     private void confiInterfaceToFriendProfile() {
+
         profileBottomNavigation.setVisibility(View.GONE);
 
         getSupportActionBar().setTitle(selectedUser.getName());
@@ -247,6 +253,43 @@ public class ProfileActivity extends AppCompatActivity {
                 intent.putExtra(Constants.IntentKey.SELECTED_USER, selectedUser);
                 intent.putExtra(Constants.IntentKey.SELECTED_POST, postsList.get(position));
                 startActivity(intent);
+            }
+        });
+    }
+
+    /**
+     * you must implement this method only if user is on his profile
+     */
+    private void configLongClickToDeletePostListener() {
+        gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(ProfileActivity.this);
+                alert.setTitle("Tem certeza que deseja excluir o post?");
+                alert.setMessage("Essa operação não pode ser desfeita");
+                alert.setNegativeButton("Cancelar", null);
+                alert.setPositiveButton("Sim, tenho certeza", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // double check user on his profile
+                        if (selectedUser.getId().equals(loggedUser.getId())) {
+
+                            Post postToRemove = postsList.get(position);
+                            if (PostHelper.removeOnDatabase(postToRemove, loggedUser.getFollowersId())) {
+                                loggedUser.decrementCountPosts();
+                                if (UserHelper.updateOnDatabase(loggedUser)) {
+                                    postsList.remove(postToRemove);
+                                    gripAdapter.notifyDataSetChanged();
+                                    MessageHelper.showLongToast("Foto removida com sucesso");
+                                }
+                            };
+                        }
+
+                    }
+                });
+                alert.create();
+                alert.show();
+                return true;
             }
         });
     }

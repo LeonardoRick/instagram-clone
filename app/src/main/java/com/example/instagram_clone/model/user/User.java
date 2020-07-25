@@ -5,6 +5,8 @@ import android.net.Uri;
 import com.google.firebase.database.Exclude;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class User implements Serializable {
@@ -20,6 +22,8 @@ public class User implements Serializable {
     private Integer countPosts;
     private Integer countFollowers;
     private Integer countFollowing;
+    
+    private List<String> followersId;
 
     public User() {}
 
@@ -50,26 +54,43 @@ public class User implements Serializable {
         if (countPosts == null) countPosts = 1;
         else countPosts++;
     }
+
+    public void decrementCountPosts() {
+        if (countPosts == null || countPosts == 0) countPosts = 0;
+        else countPosts--;
+    }
+
+    public void addFollower(String id) {
+        if (followersId == null)  followersId = new ArrayList<>();
+        followersId.add(id);
+    }
+
+    public void removeFollower(String id) {
+        if (followersId == null) return;
+        followersId.remove(id);
+    }
     /********* getters and setters *******/
 
     public String getId() { return id; }
 
     public String getName() { return name; }
-
+    
+    public String getNameToSearch() { return nameToSearch; }
+    
     public String getEmail() { return email; }
+    @Exclude
+    public String getPassword() { return password; }
+
+    public String getImagePath() { return imagePath; }
 
     public Integer getCountPosts() { return countPosts; }
 
     public Integer getCountFollowers() { return countFollowers; }
 
     public Integer getCountFollowing() { return countFollowing; }
-
-    public String getNameToSearch() { return nameToSearch; }
-
-    @Exclude
-    public String getPassword() { return password; }
-
-    public String getImagePath() { return imagePath; }
+    
+    public List<String> getFollowersId() { return followersId; }
+    
 
     public void setId(String id) { this.id = id;}
 
@@ -89,4 +110,6 @@ public class User implements Serializable {
     public void setCountFollowers(Integer countFollowers) { this.countFollowers = countFollowers; }
 
     public void setCountFollowing(Integer countFollowing) { this.countFollowing = countFollowing; }
+    
+    public void setFollowersId(List<String> followersId) { this.followersId = followersId; }
 }

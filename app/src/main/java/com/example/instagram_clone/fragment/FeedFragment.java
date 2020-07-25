@@ -21,7 +21,6 @@ import com.example.instagram_clone.utils.Constants;
 import com.example.instagram_clone.utils.FirebaseConfig;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -35,8 +34,6 @@ public class FeedFragment extends Fragment {
     private FeedAdapter feedAdapter;
     private User loggedUser;
 
-    private DatabaseReference feedRef;
-    private ValueEventListener valueEventListener;
     public FeedFragment() {
         // Required empty public constructor
     }
@@ -50,7 +47,6 @@ public class FeedFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        feedRef.removeEventListener(valueEventListener);
     }
 
     @Override
@@ -85,15 +81,13 @@ public class FeedFragment extends Fragment {
      * feed node on firebase, so he can see all posts from people who he is following
      */
     private void recoverFeedInfo() {
-
-        feedRef = FirebaseConfig.getFirebaseDatabase()
+        FirebaseConfig.getFirebaseDatabase()
                 .child(Constants.FeedNode.KEY)
-                .child(loggedUser.getId());
-
-        valueEventListener =
-                feedRef.addValueEventListener(new ValueEventListener() {
+                .child(loggedUser.getId())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        feedList.clear();
                         for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                             Post post = postSnapshot.getValue(Post.class);
                             recoverUserWhoPostedInfo(post);
@@ -124,10 +118,8 @@ public class FeedFragment extends Fragment {
                         User userWhoPosted = dataSnapshot.getValue(User.class);
                         feedItem.setPost(post);
                         feedItem.setUserWhoPosted(userWhoPosted);
-                        feedList.add(feedItem);
-                        feedAdapter.notifyDataSetChanged();
-                        Collections.sort(feedList);
-                        Collections.reverse(feedList);
+
+                        addPostOnFeed(feedItem);
                     }
 
                     @Override
@@ -135,5 +127,12 @@ public class FeedFragment extends Fragment {
 
                     }
                 });
+    }
+
+    private void addPostOnFeed(FeedItem feedItem) {
+        feedList.add(feedItem);
+        Collections.sort(feedList);
+        Collections.reverse(feedList);
+        feedAdapter.notifyDataSetChanged();
     }
 }

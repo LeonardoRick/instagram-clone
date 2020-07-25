@@ -3,5 +3,5 @@
 
     <string name="go_to_register"><u>Cadastre-se</u></string>
     <string name="update_image"><u>Alterar foto de perfil</u></string>
-
+    <string name="tip_search_fragment">Procure por Leonardo, Mariana, Jonas e Maria, os primeiros usuários do instagram clone</string>
 </resources>

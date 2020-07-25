@@ -36,9 +36,13 @@ public class Constants {
         public static final String NAME_TO_SEARCH = "nameToSearch";
         public static final String EMAIL = "email";
         public static final String IMAGE_PATH = "imagePath";
+
         public static final String COUNT_POSTS = "countPosts";
         public static final String COUNT_FOLLOWERS = "countFollowers";
         public static final String COUNT_FOLLOWING = "countFollowing";
+
+        public static  final String FOLLOWERS_ID = "followersId";
+
     }
 
     public static class FollowNode {

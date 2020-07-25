@@ -113,44 +113,13 @@ public class PostActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         // used only to update user number of posts on database
                         loggedUser = dataSnapshot.getValue(User.class);
-                        recoverFollowersInfo();
-
+                        MessageHelper.closeLoadingDialog();
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
                         MessageHelper.closeLoadingDialog();
                         MessageHelper.showLongToast("Erro ao carregar informações do usuário, não será possível publicar agora");
-                    }
-                });
-    }
-
-
-    /**
-     * Recover Followers of logged user so we can save his new post
-     * os their feeds
-     * expected return on dataSnapshot:
-     * <id follower>
-     *     follower : true
-     */
-    private void recoverFollowersInfo () {
-        FirebaseConfig.getFirebaseDatabase()
-                .child(Constants.FollowNode.KEY)
-                .child(loggedUser.getId())
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if(dataSnapshot.exists()) {
-                            for (DataSnapshot follower: dataSnapshot.getChildren())
-                                followersId.add(follower.getKey());
-                        }
-
-                        MessageHelper.closeLoadingDialog();
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        MessageHelper.closeLoadingDialog();
                     }
                 });
     }
@@ -228,7 +197,7 @@ public class PostActivity extends AppCompatActivity {
      * Method called when user clicks "check" button to post image
      */
     private void publishPost() {
-        MessageHelper.openLoadingDialog(this, "Carregando informações, aguarde");
+        MessageHelper.openLoadingDialog(this, "Salvando imagem, aguarde");
         final String imageId = FirebaseConfig.getFirebaseDatabase()
                 .child(Constants.PostNode.KEY).push().getKey();
 
@@ -264,7 +233,7 @@ public class PostActivity extends AppCompatActivity {
                             post.setDesc(imageDesc.getText().toString());
 
                         loggedUser.incrementCountPosts();
-                        if (PostHelper.saveOnDatabase(post, followersId)
+                        if (PostHelper.saveOnDatabase(post, loggedUser.getFollowersId())
                                 && UserHelper.updateOnDatabase(loggedUser)) {
 
 
