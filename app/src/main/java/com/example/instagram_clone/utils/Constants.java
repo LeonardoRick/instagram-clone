@@ -41,12 +41,13 @@ public class Constants {
         public static final String COUNT_FOLLOWERS = "countFollowers";
         public static final String COUNT_FOLLOWING = "countFollowing";
 
-        public static  final String FOLLOWERS_ID = "followersId";
+        public static final String FOLLOWERS_ID = "followersId";
+        public static final String FOLLOWINGS_ID = "followingsId";
 
     }
 
     public static class FollowNode {
-        public static final String KEY = "follow";
+        public static final String KEY = "followers-list";
         public static final String FOLLOWER = "follower";
     }
 

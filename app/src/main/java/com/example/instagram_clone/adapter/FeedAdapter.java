@@ -68,7 +68,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                 .into(holder.postInfoImageView);
 
 
-        // like button config
+        /******* like button config *******/
         if (post.getUsersWhoLiked() != null) {
             if (post.getUsersWhoLiked().contains(loggedUserId)) {
                 holder.likeButton.setLiked(true);
@@ -88,6 +88,15 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                 holder.postInfoLikes.setText((post.getLikes() - 1) + Constants.Labels.LIKES);
                 post.removeLike(UserHelper.getLogged().getId());
                 PostHelper.updateOnDatabase(post, userWhoPosted.getFollowersId());
+            }
+        });
+
+        /******* comment button config *******/
+        holder.commentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                TODO:
+//                startActivity()
             }
         });
 

@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -55,11 +56,12 @@ public class ProfileActivity extends AppCompatActivity {
 
 
     private GridView gridView;
-    private GridAdapter gripAdapter;
+    private GridAdapter gridAdapter;
     private List<Post> postsList = new ArrayList<>();
 
     private DatabaseReference selectedUserRef;
-    private ValueEventListener valueEventListener;
+    private ValueEventListener selectedUserEventListener;
+    private ValueEventListener loggedUserEventListener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,11 +77,12 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        UserHelper.getLoggedCompleteInfo()
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+        loggedUserEventListener = UserHelper.getLoggedCompleteInfo()
+                .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         loggedUser = dataSnapshot.getValue(User.class);
+                        Log.e("TAG", "onDataChange: " + loggedUser.getFollowingsId() );
                         recoverBasicSelectedUserInfo();
 
                     }
@@ -93,8 +96,11 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        if (valueEventListener != null)
-            selectedUserRef.removeEventListener(valueEventListener);
+        if (selectedUserEventListener != null)
+            selectedUserRef.removeEventListener(selectedUserEventListener);
+
+        if (loggedUserEventListener != null)
+            UserHelper.getLoggedCompleteInfo().removeEventListener(loggedUserEventListener);
     }
 
     private void initViewElements() {
@@ -136,7 +142,7 @@ public class ProfileActivity extends AppCompatActivity {
         selectedUserRef = FirebaseConfig.getFirebaseDatabase()
                 .child(Constants.UsersNode.KEY)
                 .child(selectedUser.getId());
-        valueEventListener =
+        selectedUserEventListener =
                 selectedUserRef
                 .addValueEventListener(new ValueEventListener() {
                     @Override
@@ -196,14 +202,13 @@ public class ProfileActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // if is following, we unfollow when user clicks the button
                 if (isFollowed) {
-                    FollowHelper.unfollow(selectedUser);
+                    FollowHelper.unfollow(loggedUser, selectedUser);
                     isFollowed = false;
                 }
                 else {
-                    FollowHelper.follow(selectedUser);
+                    FollowHelper.follow(loggedUser, selectedUser);
                     isFollowed = true;
                 }
-                updateNumbers(isFollowed);
                 checkIfLoggedFollowSelectedUser();
             }
         });
@@ -212,9 +217,9 @@ public class ProfileActivity extends AppCompatActivity {
     /**
      * Config grid adapter to show posts of user as grid
      */
-    private void configGridView(List<String> postsUrl) {
-        gripAdapter = new GridAdapter(getApplicationContext(), R.layout.post_list_item, postsUrl);
-        gridView.setAdapter(gripAdapter);
+    private void configGridView(List<Post> posts) {
+        gridAdapter = new GridAdapter(getApplicationContext(), R.layout.post_list_item, posts);
+        gridView.setAdapter(gridAdapter);
     }
     /**
      * Load user posts on gridView
@@ -226,16 +231,14 @@ public class ProfileActivity extends AppCompatActivity {
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        postsList.clear();
                         if (dataSnapshot.exists()) {
-                            List<String> postsUrl = new ArrayList<>();
                             for (DataSnapshot data : dataSnapshot.getChildren()) {
                                 Post post = data.getValue(Post.class);
                                 postsList.add(post);
-                                postsUrl.add(post.getImagePath());
                             }
                             Collections.reverse(postsList);
-                            Collections.reverse(postsUrl);
-                            configGridView(postsUrl);
+                            configGridView(postsList);
                         }
                     }
 
@@ -279,7 +282,7 @@ public class ProfileActivity extends AppCompatActivity {
                                 loggedUser.decrementCountPosts();
                                 if (UserHelper.updateOnDatabase(loggedUser)) {
                                     postsList.remove(postToRemove);
-                                    gripAdapter.notifyDataSetChanged();
+                                    configGridView(postsList);
                                     MessageHelper.showLongToast("Foto removida com sucesso");
                                 }
                             };
@@ -294,29 +297,29 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Update numbers following and followers on loggedUser and selectedUser when
-     * loggedUser follow or unfollow selectedUser
-     * @param isFollowed to check userIs followed
-     */
-    private void updateNumbers(boolean isFollowed) {
-        int countLoggedFollowing = loggedUser.getCountFollowing();
-        int countSelectedUserFollowers = selectedUser.getCountFollowers();
-
-        if (isFollowed) {
-            countLoggedFollowing++;
-            countSelectedUserFollowers++;
-        } else { // if its not a follow action, it's a unfollow action
-            countLoggedFollowing--;
-            countSelectedUserFollowers--;
-        }
-
-        loggedUser.setCountFollowing(countLoggedFollowing);
-        selectedUser.setCountFollowers(countSelectedUserFollowers);
-
-        UserHelper.updateOnDatabase(loggedUser);
-        UserHelper.updateOnDatabase(selectedUser);
-    }
+//    /**
+//     * Update numbers following and followers on loggedUser and selectedUser when
+//     * loggedUser follow or unfollow selectedUser
+//     * @param isFollowed to check userIs followed
+//     */
+//    private void updateNumbers(boolean isFollowed) {
+//        int countLoggedFollowing = loggedUser.getCountFollowing();
+//        int countSelectedUserFollowers = selectedUser.getCountFollowers();
+//
+//        if (isFollowed) {
+//            countLoggedFollowing++;
+//            countSelectedUserFollowers++;
+//        } else { // if its not a follow action, it's a unfollow action
+//            countLoggedFollowing--;
+//            countSelectedUserFollowers--;
+//        }
+//
+//        loggedUser.setCountFollowing(countLoggedFollowing);
+//        selectedUser.setCountFollowers(countSelectedUserFollowers);
+//
+//        UserHelper.updateOnDatabase(loggedUser);
+//        UserHelper.updateOnDatabase(selectedUser);
+//    }
     /**
      * check if logged user is one of the selectedUser followers to change button style and action
      */

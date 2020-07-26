@@ -77,7 +77,16 @@
                 android:layout_marginEnd="32dp"
                 android:onClick="saveUserProfileInfo"
                 android:text="Salvar alterações" />
-
+            <Button
+                android:id="@+id/deleteUser"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
+                android:background="@drawable/textbox_background"
+                android:layout_marginTop="64dp"
+                android:onClick="deleteUserForever"
+                android:text="Excluir usuário"/>
             <ProgressBar
                 android:id="@+id/progressBarChangeProfilePicture"
                 android:layout_marginTop="16dp"

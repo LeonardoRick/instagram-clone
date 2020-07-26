@@ -51,7 +51,6 @@ public class PostActivity extends AppCompatActivity {
     private Bitmap filteredImage;
     private List<ThumbnailItem> thumbnailsList = new ArrayList<>();
     private User loggedUser;
-    private List<String> followersId = new ArrayList<>();
     private RecyclerView recyclerFilters;
     private ThumbnailAdapter adapter;
 

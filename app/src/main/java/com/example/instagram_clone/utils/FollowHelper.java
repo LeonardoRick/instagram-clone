@@ -11,25 +11,30 @@ public class FollowHelper {
     public static final String TAG = "FollowHelper";
     /**
      * save followed id --> following id
-     * @param selectedUser followed
+     * @param followerUser
+     * @param toBeFollowedUser
      * database:
      * follow
      *     <selectedUser id>
      *              <loggedUser id (followerId)>
      *                     follower : true
      */
-    public static boolean follow(User selectedUser) {
+    public static boolean follow(User followerUser, User toBeFollowedUser) {
         try {
             FirebaseConfig.getFirebaseDatabase()
                     .child(Constants.FollowNode.KEY)
-                    .child(selectedUser.getId())
-                    .child(UserHelper.getLogged().getId())
+                    .child(toBeFollowedUser.getId())
+                    .child(followerUser.getId())
                     .child(Constants.FollowNode.FOLLOWER)
                     .setValue(true);
 
-            selectedUser.addFollower(UserHelper.getLogged().getId());
-            UserHelper.updateOnDatabase(selectedUser);
-            PostHelper.addAllOnFeed(selectedUser.getId());
+            followerUser.startFollowing(toBeFollowedUser.getId());
+            toBeFollowedUser.addFollower(followerUser.getId());
+
+            UserHelper.updateOnDatabase(followerUser);
+            UserHelper.updateOnDatabase(toBeFollowedUser);
+
+            PostHelper.addAllOnFeed(toBeFollowedUser.getId());
             return true;
         } catch (Exception e) {
             Log.e(TAG, "follow: " + e.getMessage());
@@ -40,7 +45,8 @@ public class FollowHelper {
 
     /**
      * save followed id --> following id
-     * @param selectedUser followed
+     * @param unfollowerUser
+     * @param toBeUnfollowedUser
      * database 1:
      * follow
      *     <selectedUser id>
@@ -53,18 +59,21 @@ public class FollowHelper {
      *            followers : arraylist.remove(loggedUserId)
      *
      */
-    public static boolean unfollow(User selectedUser) {
+    public static boolean unfollow(User unfollowerUser, User toBeUnfollowedUser) {
         try {
             FirebaseConfig.getFirebaseDatabase()
                     .child(Constants.FollowNode.KEY)
-                    .child(selectedUser.getId())
-                    .child(UserHelper.getLogged().getId())
-                    .child(Constants.FollowNode.FOLLOWER)
+                    .child(toBeUnfollowedUser.getId())
+                    .child(unfollowerUser.getId())
                     .removeValue();
 
-            selectedUser.removeFollower(UserHelper.getLogged().getId());
-            UserHelper.updateOnDatabase(selectedUser);
-            PostHelper.removeAllOnFeed(selectedUser.getId());
+            unfollowerUser.stopFollowing(toBeUnfollowedUser.getId());
+            toBeUnfollowedUser.removeFollower(unfollowerUser.getId());
+
+            UserHelper.updateOnDatabase(unfollowerUser);
+            UserHelper.updateOnDatabase(toBeUnfollowedUser);
+
+            PostHelper.removeAllOnFeed(toBeUnfollowedUser.getId());
             return true;
         } catch (Exception e) {
             Log.e(TAG, "unfollow: " + e.getMessage());

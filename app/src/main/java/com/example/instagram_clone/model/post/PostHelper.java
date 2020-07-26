@@ -46,17 +46,20 @@ public class PostHelper {
 
             // saving feed info on new thread because user can have a lot of followers
             // and we don't want to lose performance on this process
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    for (String follower : followersId)
-                    FirebaseConfig.getFirebaseDatabase()
-                            .child(Constants.FeedNode.KEY)
-                            .child(follower)
-                            .child(post.getId())
-                            .setValue(post);
-                }
-            }).start();
+            if (followersId != null) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (String follower : followersId)
+                            FirebaseConfig.getFirebaseDatabase()
+                                    .child(Constants.FeedNode.KEY)
+                                    .child(follower)
+                                    .child(post.getId())
+                                    .setValue(post);
+                    }
+                }).start();
+            }
+
             return true;
         } catch(Exception e) {
             Log.e(TAG, "saveOnDatabase: " + e.getMessage() );
@@ -76,17 +79,20 @@ public class PostHelper {
 
             // saving feed info on new thread because user can have a lot of followers
             // and we don't want to lose performance on this process
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    for (String follower : followersId)
-                        FirebaseConfig.getFirebaseDatabase()
-                                .child(Constants.FeedNode.KEY)
-                                .child(follower)
-                                .child(post.getId())
-                                .updateChildren(postMap);
-                }
-            }).start();
+            if (followersId != null) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (String follower : followersId)
+                            FirebaseConfig.getFirebaseDatabase()
+                                    .child(Constants.FeedNode.KEY)
+                                    .child(follower)
+                                    .child(post.getId())
+                                    .updateChildren(postMap);
+                    }
+                }).start();
+            }
+
             return true;
         } catch(Exception e) {
             Log.e(TAG, "updateOnDatabase: " + e.getMessage() );
@@ -104,17 +110,20 @@ public class PostHelper {
 
             // saving feed info on new thread because user can have a lot of followers
             // and we don't want to lose performance on this process
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    for (String follower : followersId)
-                        FirebaseConfig.getFirebaseDatabase()
-                                .child(Constants.FeedNode.KEY)
-                                .child(follower)
-                                .child(post.getId())
-                                .removeValue();
-                }
-            }).start();
+            if (followersId != null) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (String follower : followersId)
+                            FirebaseConfig.getFirebaseDatabase()
+                                    .child(Constants.FeedNode.KEY)
+                                    .child(follower)
+                                    .child(post.getId())
+                                    .removeValue();
+                    }
+                }).start();
+            }
+
             return true;
         } catch(Exception e) {
             Log.e(TAG, "removeOnDatabase: " + e.getMessage() );
@@ -142,10 +151,10 @@ public class PostHelper {
                             if (dataSnapshot.exists()) {
                                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                                     FirebaseConfig.getFirebaseDatabase()
-                                            .child(Constants.FeedNode.KEY)
-                                            .child(UserHelper.getLogged().getId())
-                                            .child(postSnapshot.getKey())
-                                            .setValue(postSnapshot.getValue(Post.class));
+                                        .child(Constants.FeedNode.KEY)
+                                        .child(UserHelper.getLogged().getId())
+                                        .child(postSnapshot.getKey())
+                                        .setValue(postSnapshot.getValue(Post.class));
                                 }
 
                             }

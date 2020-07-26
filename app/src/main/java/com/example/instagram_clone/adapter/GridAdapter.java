@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.example.instagram_clone.R;
+import com.example.instagram_clone.model.post.Post;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -18,17 +19,12 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-public class GridAdapter extends ArrayAdapter<String> {
-
-    private Context context;
+public class GridAdapter extends ArrayAdapter<Post> {
     private int layoutResource;
-    private List<String> postsUrl;
 
-    public GridAdapter(@NonNull Context context, int resource, @NonNull List<String> objects) {
+    public GridAdapter(@NonNull Context context, int resource, @NonNull List<Post> objects) {
         super(context, resource, objects);
-        this.context = context;
         this.layoutResource = resource;
-        this.postsUrl = objects;
     }
 
     @NonNull
@@ -37,7 +33,7 @@ public class GridAdapter extends ArrayAdapter<String> {
         final GridViewHolder gridViewHolder;
         if (convertView == null) {
             gridViewHolder = new GridViewHolder();
-            LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater layoutInflater = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(layoutResource, parent, false);
             gridViewHolder.image = convertView.findViewById(R.id.imageViewPost);
             gridViewHolder.progressBar = convertView.findViewById(R.id.progressBarGridPost);
@@ -46,10 +42,11 @@ public class GridAdapter extends ArrayAdapter<String> {
         } else
             gridViewHolder = (GridViewHolder) convertView.getTag();
 
-        String picturePath = getItem(position);
+        Post post = getItem(position);
+        String imagePath = post.getImagePath();
 
         gridViewHolder.progressBar.setVisibility(View.VISIBLE);
-        Uri uri = Uri.parse(picturePath);
+        Uri uri = Uri.parse(imagePath);
         Picasso.get().load(uri)
                 .into(gridViewHolder.image, new Callback() {
                     @Override
@@ -72,7 +69,7 @@ public class GridAdapter extends ArrayAdapter<String> {
 
     @Nullable
     @Override
-    public String getItem(int position) {
+    public Post getItem(int position) {
         return super.getItem(position);
     }
 }

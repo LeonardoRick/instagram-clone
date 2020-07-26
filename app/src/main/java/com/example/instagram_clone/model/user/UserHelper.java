@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.example.instagram_clone.utils.Constants;
 import com.example.instagram_clone.utils.FirebaseConfig;
+import com.example.instagram_clone.utils.FollowHelper;
 import com.example.instagram_clone.utils.MessageHelper;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -13,9 +14,13 @@ import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 
+import java.security.AuthProvider;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -121,6 +126,7 @@ public class UserHelper {
         if (user.getCountFollowing() != null) userMap.put(Constants.UsersNode.COUNT_FOLLOWING, user.getCountFollowing());
         
         if (user.getFollowersId() != null) userMap.put(Constants.UsersNode.FOLLOWERS_ID, user.getFollowersId());
+        if (user.getFollowingsId() != null) userMap.put(Constants.UsersNode.FOLLOWINGS_ID, user.getFollowingsId());
         return userMap;
     }
 
@@ -159,10 +165,6 @@ public class UserHelper {
             Log.e(TAG, "updateProfilePicture: " + e.getMessage());
             return false;
         }
-    }
-
-    private void teste(@NonNull Task<Void> task) throws Exception {
-        throw  task.getException();
     }
 
     /**
@@ -209,5 +211,119 @@ public class UserHelper {
                     }
                 }
             });
+    }
+
+
+    /**
+     * Deletes basicInfoUser permanently from auth storage and  everything related to the app
+     * Since it's a sensitive  operation, basicInfoUser need's to reauthenticate.
+     * Be sure to update this method everytime you add new nodes on database that uses basicInfoUser info
+     *
+     * Be sure to call this method with a complete basicInfoUser info that contains all his
+     * info including following and followers users
+     * @param basicInfoUser
+     */
+    public static void deleteUserPermanently(final User basicInfoUser) {
+        try  {
+            AuthCredential credential = EmailAuthProvider
+                    .getCredential(basicInfoUser.getEmail(), basicInfoUser.getPassword());
+            final FirebaseUser firebaseUser = FirebaseConfig.getAuth().getCurrentUser();
+
+            firebaseUser.reauthenticate(credential).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        // remove all posts
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                FirebaseConfig.getFirebaseDatabase()
+                                        .child(Constants.PostNode.KEY)
+                                        .child(basicInfoUser.getId())
+                                        .removeValue();
+                            }
+                        }).start();
+
+                        getLoggedCompleteInfo().addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                                final User user = dataSnapshot.getValue(User.class);
+                                // new thread to unfollow all users
+                                if (user.getFollowingsId() != null) {
+                                    for (String followingId : user.getFollowingsId()) {
+                                        FirebaseConfig.getFirebaseDatabase()
+                                                .child(Constants.UsersNode.KEY)
+                                                .child(followingId)
+                                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                        User followingUser = dataSnapshot.getValue(User.class);
+                                                        FollowHelper.unfollow(user, followingUser);
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError databaseError) { }
+                                                });
+                                    }
+
+                                }
+
+                                // be unfollowed from all users
+                                if (user.getFollowersId() != null) {
+                                    for (String followersId : user.getFollowersId()) {
+                                        FirebaseConfig.getFirebaseDatabase()
+                                                .child(Constants.UsersNode.KEY)
+                                                .child(followersId)
+                                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                        User followerUser = dataSnapshot.getValue(User.class);
+                                                        FollowHelper.unfollow(followerUser, user);
+
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError databaseError) { }
+                                                });
+                                    }
+                                }
+
+                                // removes from basicInfoUser node make sure to call this
+                                // delete after all other database deleting
+                                FirebaseConfig.getFirebaseDatabase()
+                                        .child(Constants.UsersNode.KEY)
+                                        .child(user.getId())
+                                        .removeValue()
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+
+                                                } else {
+                                                    try {
+                                                        throw task.getException();
+                                                    } catch (Exception e) {
+                                                        Log.d(TAG, "onComplete: " + e.getMessage());
+                                                    }
+                                                }
+                                            }
+                                        });
+
+                                // call this at the end
+                                firebaseUser.delete();
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) { }
+                        });
+//                        TODO
+//                        REMOVER STORAGE
+                    }
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "removeUserPermanently: " + e.getMessage() );
+        }
     }
 }

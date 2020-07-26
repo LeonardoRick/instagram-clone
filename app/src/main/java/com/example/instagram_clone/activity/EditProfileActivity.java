@@ -20,9 +20,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.Editable;
-import android.text.method.PasswordTransformationMethod;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
@@ -107,7 +105,6 @@ public class EditProfileActivity extends AppCompatActivity {
         }
     }
 
-
     /**
      * validate if both Name and email has a value before updating
      * @return boolean if all fields are filled
@@ -128,26 +125,15 @@ public class EditProfileActivity extends AppCompatActivity {
      * @return user password
      */
     private void updateEmail(final User user, final String newEmail) {
+        final EditText input = MessageHelper.getInputToDialog();
         // Frame Layout
         FrameLayout container = new FrameLayout(this);
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-        );
-        params.setMargins(dpToPixel(32), 0, dpToPixel(32), 0);
-
-        // setup input
-        final EditText input = new EditText(this);
-        input.setLayoutParams(params);
         container.addView(input);
-        input.setSingleLine(); // never call this method after setTransformatoinMethod
-        input.setTransformationMethod(PasswordTransformationMethod.getInstance()); // show as password
 
         // AlertDialog
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("Informe sua senha para realizar a alteração do email");
         alert.setView(container);
-
+        alert.setTitle("Informe sua senha para realizar a alteração do email");
 
         alert.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
             @Override
@@ -167,10 +153,6 @@ public class EditProfileActivity extends AppCompatActivity {
         alert.show();
     };
 
-    private int dpToPixel(int dp) {
-        float density = getResources().getDisplayMetrics().density;
-        return (int) (dp * density); // pixel value
-    }
 
     /**
      * Change behavior of app backbutton to work like native smartphone backbutton
@@ -180,7 +162,6 @@ public class EditProfileActivity extends AppCompatActivity {
         finish();
         return false;
     }
-
 
     /* **************** START - Process of updating profile image  **************** */
     public void validatePermission(View view) {
@@ -335,4 +316,30 @@ public class EditProfileActivity extends AppCompatActivity {
         } else progressBar.setVisibility(View.GONE);
     }
     /* **************** END - Process of updating profile image  **************** */
+
+    public void deleteUserForever(View view) {
+        final EditText input = MessageHelper.getInputToDialog();
+
+        FrameLayout frameLayout = new FrameLayout(this);
+        frameLayout.addView(input);
+
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setView(frameLayout);
+        alert.setTitle("Você tem certeza que deseja fazer isso?");
+        alert.setMessage("Essa operação não pode ser desfeita e você perderá todos os dados salvos até hoje." +
+                " Se quiser prosseguir, digite sua senha");
+        alert.setNegativeButton("Cancelar", null);
+        alert.setPositiveButton("Sim, tenho certeza", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (input.getText() != null) {
+                    User user = UserHelper.getLogged();
+                    user.setPassword(input.getText().toString());
+                    UserHelper.deleteUserPermanently(user);
+                }
+            }
+        });
+        alert.create();
+        alert.show();
+    }
 }

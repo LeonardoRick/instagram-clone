@@ -124,7 +124,7 @@ public class SearchFragment extends Fragment {
      * @param text to search user name
      */
     private void searchUsers(String text) {
-        if (text.length() > 1) {
+        if (text.length() > 0) {
             Query query = FirebaseConfig.getFirebaseDatabase()
                     .child(Constants.UsersNode.KEY)
                     .orderByChild(Constants.UsersNode.NAME_TO_SEARCH)

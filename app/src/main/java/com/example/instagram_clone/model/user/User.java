@@ -1,6 +1,7 @@
 package com.example.instagram_clone.model.user;
 
 import android.net.Uri;
+import android.util.Log;
 
 import com.google.firebase.database.Exclude;
 
@@ -24,6 +25,7 @@ public class User implements Serializable {
     private Integer countFollowing;
     
     private List<String> followersId;
+    private List<String> followingsId;
 
     public User() {}
 
@@ -61,20 +63,46 @@ public class User implements Serializable {
     }
 
     public void addFollower(String id) {
-        if (followersId == null)  followersId = new ArrayList<>();
+        if (followersId == null)  {
+            followersId = new ArrayList<>();
+            countFollowers = 0;
+        }
         followersId.add(id);
+        countFollowers++;
     }
 
     public void removeFollower(String id) {
         if (followersId == null) return;
         followersId.remove(id);
+
+        if (countFollowers == null || countFollowers == 0) countFollowers = 0;
+        else countFollowers--;
+    }
+
+    public void startFollowing(String id) {
+        if (followingsId == null)  {
+            followingsId = new ArrayList<>();
+            countFollowing = 0;
+        }
+
+        followingsId.add(id);
+        countFollowing++;
+    }
+
+    public void stopFollowing(String id) {
+        if (followingsId == null) return;
+        followingsId.remove(id);
+
+        if (countFollowing == null || countFollowing == 0) countFollowing = 0;
+        else countFollowing--;
     }
     /********* getters and setters *******/
 
     public String getId() { return id; }
 
     public String getName() { return name; }
-    
+
+    // keep all get's for firebase work properly
     public String getNameToSearch() { return nameToSearch; }
     
     public String getEmail() { return email; }
@@ -90,7 +118,8 @@ public class User implements Serializable {
     public Integer getCountFollowing() { return countFollowing; }
     
     public List<String> getFollowersId() { return followersId; }
-    
+
+    public List<String> getFollowingsId() { return followingsId; }
 
     public void setId(String id) { this.id = id;}
 
@@ -110,6 +139,4 @@ public class User implements Serializable {
     public void setCountFollowers(Integer countFollowers) { this.countFollowers = countFollowers; }
 
     public void setCountFollowing(Integer countFollowing) { this.countFollowing = countFollowing; }
-    
-    public void setFollowersId(List<String> followersId) { this.followersId = followersId; }
 }
