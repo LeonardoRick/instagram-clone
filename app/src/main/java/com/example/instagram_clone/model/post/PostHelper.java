@@ -2,6 +2,7 @@ package com.example.instagram_clone.model.post;
 
 import android.util.Log;
 
+import com.example.instagram_clone.model.user.User;
 import com.example.instagram_clone.model.user.UserHelper;
 import com.example.instagram_clone.utils.Constants;
 import com.example.instagram_clone.utils.FirebaseConfig;
@@ -68,7 +69,6 @@ public class PostHelper {
     }
 
     public static boolean updateOnDatabase(final Post post, final List<String> followersId) {
-
         final Map<String, Object> postMap = convertPostToMap(post);
         try {
             FirebaseConfig.getFirebaseDatabase()
@@ -176,16 +176,17 @@ public class PostHelper {
     /**
      * Remove all posts of unfollowed user on feed of logged user by
      * Acessing feed database and removing all posts from specified unfollowedUserId
-     * @param unfollowedUserId
+     * @param unfollowerUser
+     * @param toBeUnfollowedUser
      * @return boolean to control success of operation
      */
-    public static boolean removeAllOnFeed(String unfollowedUserId) {
+    public static boolean removeAllOnFeed(User unfollowerUser, User toBeUnfollowedUser) {
         try {
             FirebaseConfig.getFirebaseDatabase()
                     .child(Constants.FeedNode.KEY)
-                    .child(UserHelper.getLogged().getId())
+                    .child(unfollowerUser.getId())
                     .orderByChild(Constants.PostNode.USER_ID)
-                    .equalTo(unfollowedUserId)
+                    .equalTo(toBeUnfollowedUser.getId())
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -223,6 +224,7 @@ public class PostHelper {
         if (post.getImagePath() != null) userMap.put(Constants.PostNode.IMAGE_PATH, post.getImagePath());
         if (post.getLikes() != null) userMap.put(Constants.PostNode.LIKES, post.getLikes());
         if (post.getUsersWhoLiked() != null) userMap.put(Constants.PostNode.USERS_WHO_LIKED, post.getUsersWhoLiked());
+        if (post.getPostComments() != null) userMap.put(Constants.PostNode.POST_COMMENTS, post.getPostComments());
 
         return userMap;
     }

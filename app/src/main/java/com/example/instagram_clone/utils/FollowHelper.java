@@ -73,7 +73,7 @@ public class FollowHelper {
             UserHelper.updateOnDatabase(unfollowerUser);
             UserHelper.updateOnDatabase(toBeUnfollowedUser);
 
-            PostHelper.removeAllOnFeed(toBeUnfollowedUser.getId());
+            PostHelper.removeAllOnFeed(unfollowerUser, toBeUnfollowedUser);
             return true;
         } catch (Exception e) {
             Log.e(TAG, "unfollow: " + e.getMessage());

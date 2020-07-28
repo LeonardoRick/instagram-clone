@@ -24,7 +24,6 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 
 public class RegisterActivity extends AppCompatActivity {
 
-
     EditText name, email, password;
     ProgressBar progressBar;
 

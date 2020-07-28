@@ -1,5 +1,7 @@
 package com.example.instagram_clone.model.post;
 
+import com.example.instagram_clone.model.PostComment;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +17,11 @@ public class Post implements Serializable {
 
     private List<String> usersWhoLiked;
 
-    public Post() {}
+    private List<PostComment> postComments;
+
+    public Post() {
+        postComments = new ArrayList<>();
+    }
 
     public void addLike(String whoLikedId) {
         if (usersWhoLiked == null) usersWhoLiked = new ArrayList<>();
@@ -34,10 +40,15 @@ public class Post implements Serializable {
     }
 
 
-//    public void addComment(PostComment comment) {};
-//
-//    public void removeComment(PostComment comment) {};
+    public void addComment(PostComment comment) {
+        if (postComments == null) postComments = new ArrayList<>();
+        postComments.add(comment);
+    };
 
+    public void removeComment(PostComment comment) {
+        if (postComments == null) return;
+        postComments.remove(comment);
+    };
 
     /**
      * Used to say that when comparing, if posts id are equal
@@ -64,11 +75,10 @@ public class Post implements Serializable {
     public Integer getLikes() { return likes; }
     public List<String> getUsersWhoLiked() { return usersWhoLiked; }
 
+    public List<PostComment>    getPostComments() { return postComments; }
 
     public void setId(String id) { this.id = id; }
     public void setDesc(String desc) { this.desc = desc; }
     public void setImagePath(String imagePath) { this.imagePath = imagePath; }
     public void setUserId(String userId) { this.userId = userId; }
-    public void setLikes(Integer likes) { this.likes = likes; }
-    public void setUsersWhoLiked(List<String> usersWhoLiked) { this.usersWhoLiked = usersWhoLiked; }
 }

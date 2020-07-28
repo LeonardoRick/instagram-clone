@@ -56,4 +56,6 @@ dependencies {
     // LikeButton
     implementation 'com.github.jd-alexander:LikeButton:0.2.3'
 
+    //rxJava 3
+    implementation 'io.reactivex.rxjava3:rxjava:3.0.4'
 }

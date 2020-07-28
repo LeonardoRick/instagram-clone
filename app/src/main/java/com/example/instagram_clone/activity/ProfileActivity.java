@@ -44,10 +44,10 @@ import java.util.List;
 
 public class ProfileActivity extends AppCompatActivity {
 
+    public static ProfileActivity profileActivity;
     private User selectedUser;
     private User loggedUser;
     private boolean isFollowed = false;
-    private Integer numberFollowers;
 
     private TextView labelNumberPosts, labelNumberFollowers, labelNumberFollowing;
     private Button profileActionButton;
@@ -64,6 +64,7 @@ public class ProfileActivity extends AppCompatActivity {
     private ValueEventListener loggedUserEventListener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        profileActivity = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
         // Config Toolbar
@@ -82,8 +83,7 @@ public class ProfileActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         loggedUser = dataSnapshot.getValue(User.class);
-                        Log.e("TAG", "onDataChange: " + loggedUser.getFollowingsId() );
-                        recoverBasicSelectedUserInfo();
+                            recoverBasicSelectedUserInfo();
 
                     }
 
@@ -111,6 +111,12 @@ public class ProfileActivity extends AppCompatActivity {
         labelNumberFollowers = findViewById(R.id.numberFollowers);
         labelNumberFollowing = findViewById(R.id.numberFollowing);
         profileBottomNavigation = findViewById(R.id.profileBottomNav);
+
+        // animations
+        profileBottomNavigation.enableAnimation(false);
+        profileBottomNavigation.enableItemShiftingMode(false);
+        profileBottomNavigation.enableShiftingMode(false);
+        profileBottomNavigation.setTextVisibility(false);
     }
 
     /**
@@ -122,15 +128,6 @@ public class ProfileActivity extends AppCompatActivity {
             selectedUser = (User) bundle.getSerializable(Constants.IntentKey.SELECTED_USER);
             // Using listener only to user numbers, so other info will be showed faster
             recoverCompleteSelectedUserInfo();
-
-
-
-            if (selectedUser.getImagePath() != null) {
-                Uri uri = Uri.parse(selectedUser.getImagePath());
-                Picasso.get().load(uri)
-                        .placeholder(R.drawable.profile)
-                        .into(profileImage);
-            }
         }
     }
 
@@ -147,10 +144,16 @@ public class ProfileActivity extends AppCompatActivity {
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        selectedUser = dataSnapshot.getValue(User.class);
-                        // here we have both logged user and selectedUser info
-                        // so we can build interface values
-                        configInterface();
+                        if (dataSnapshot.exists()) {
+                            selectedUser = dataSnapshot.getValue(User.class);
+                            // here we have both logged user and selectedUser info
+                            // so we can build interface values
+                            configInterface();
+                        } else {
+                            MessageHelper.showLongToast("Usuário inexistente");
+                            finish();
+                        }
+
                     }
 
                     @Override
@@ -165,9 +168,16 @@ public class ProfileActivity extends AppCompatActivity {
      * like "follow button" being "edit profile" not allowing him to follow himself
      */
     private void configInterface() {
-        labelNumberPosts.setText(String.valueOf(selectedUser.getCountPosts()));
-        labelNumberFollowers.setText(String.valueOf(selectedUser.getCountFollowers()));
-        labelNumberFollowing.setText(String.valueOf(selectedUser.getCountFollowing()));
+        if (selectedUser.getCountPosts() != null) labelNumberPosts.setText(String.valueOf(selectedUser.getCountPosts()));
+        if (selectedUser.getCountFollowers() != null) labelNumberFollowers.setText(String.valueOf(selectedUser.getCountFollowers()));
+        if (selectedUser.getCountFollowing() != null) labelNumberFollowing.setText(String.valueOf(selectedUser.getCountFollowing()));
+
+        if (selectedUser.getImagePath() != null) {
+            Uri uri = Uri.parse(selectedUser.getImagePath());
+            Picasso.get().load(uri)
+                    .placeholder(R.drawable.profile)
+                    .into(profileImage);
+        }
 
         if (selectedUser.getId().equals(loggedUser.getId()))
             configInterfaceToLoggedUser();
@@ -366,12 +376,6 @@ public class ProfileActivity extends AppCompatActivity {
      * to make it  looks more like a menu
      */
     private void configBottomNavigation() {
-        profileBottomNavigation = findViewById(R.id.profileBottomNav);
-        // animations
-        profileBottomNavigation.enableAnimation(true);
-        profileBottomNavigation.enableItemShiftingMode(true);
-        profileBottomNavigation.enableShiftingMode(false);
-        profileBottomNavigation.setTextVisibility(false);
 
         // Enable navigation
         enableNavigation(profileBottomNavigation);

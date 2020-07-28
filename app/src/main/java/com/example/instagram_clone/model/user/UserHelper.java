@@ -8,10 +8,13 @@ import com.example.instagram_clone.utils.FirebaseConfig;
 import com.example.instagram_clone.utils.FollowHelper;
 import com.example.instagram_clone.utils.MessageHelper;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
@@ -25,6 +28,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import androidx.annotation.NonNull;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.subjects.BehaviorSubject;
+import io.reactivex.rxjava3.subjects.PublishSubject;
 
 public class UserHelper {
 
@@ -219,11 +226,32 @@ public class UserHelper {
      * Since it's a sensitive  operation, basicInfoUser need's to reauthenticate.
      * Be sure to update this method everytime you add new nodes on database that uses basicInfoUser info
      *
-     * Be sure to call this method with a complete basicInfoUser info that contains all his
+     * Be sure to call this method with a complete user info that contains all his
      * info including following and followers users
+     *
+     * The method uses a async control with behavior subject that checks if all
+     * deletions on database and storage are finished (posts, storage pictures, following info, etc)
+     * before deleting user node completely.
+     *
+     * if you want to add one step more before delete user, follow this steps
+     * 1) create a 'final int' X with a new unique value that represents this deletion
+     * 2) if this deletion is needed, increment deleteCounterTarget with X before entering on async call
+     * 3) call taskFinished(X) to increment deleteCounter
+     * 4) when deleteCounter is equal to deleteCoutnerTarget, critique area are accessed and deletion is maded
+     *
      * @param basicInfoUser
      */
+    public static int deleteCounter = 0;
+    public static int deleteCounterTarget = 0;
+    public static final PublishSubject<Integer> taskFinished = PublishSubject.create();
     public static void deleteUserPermanently(final User basicInfoUser) {
+
+        final int DELETE_POSTS_FINISHED = 1000;
+        final int DELETE_FOLLOWERS_FINISHED = 2000;
+        final int DELETE_FOLLOWING_FINISHED = 3000;
+        final int DELETE_STORAGE_PROFILE_FINISHED = 4000;
+        // obs: we are not deleting storage posts because firebase doesn't have folder deletion.
+        // delete if manually
         try  {
             AuthCredential credential = EmailAuthProvider
                     .getCredential(basicInfoUser.getEmail(), basicInfoUser.getPassword());
@@ -231,26 +259,35 @@ public class UserHelper {
 
             firebaseUser.reauthenticate(credential).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
-                public void onComplete(@NonNull Task<Void> task) {
+                public void onComplete(@NonNull final Task<Void> task) {
                     if (task.isSuccessful()) {
-                        // remove all posts
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                FirebaseConfig.getFirebaseDatabase()
-                                        .child(Constants.PostNode.KEY)
-                                        .child(basicInfoUser.getId())
-                                        .removeValue();
-                            }
-                        }).start();
-
                         getLoggedCompleteInfo().addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
                                 final User user = dataSnapshot.getValue(User.class);
-                                // new thread to unfollow all users
+
+                                // remove all posts
+                                if (user.getCountPosts() != null && user.getCountPosts() != 0 ) {
+                                    deleteCounterTarget = deleteCounterTarget + DELETE_POSTS_FINISHED;
+                                    FirebaseConfig.getFirebaseDatabase()
+                                            .child(Constants.PostNode.KEY)
+                                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                    if (dataSnapshot.hasChild(user.getId())) {
+                                                        dataSnapshot.child(user.getId()).getRef().removeValue();
+                                                    }
+                                                    taskFinished.onNext(DELETE_POSTS_FINISHED);
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError databaseError) { taskFinished.onNext(DELETE_POSTS_FINISHED); }
+                                            });
+                                }
+
+                                // unfollow all users
                                 if (user.getFollowingsId() != null) {
+                                    deleteCounterTarget = deleteCounterTarget + DELETE_FOLLOWING_FINISHED;
                                     for (String followingId : user.getFollowingsId()) {
                                         FirebaseConfig.getFirebaseDatabase()
                                                 .child(Constants.UsersNode.KEY)
@@ -260,10 +297,11 @@ public class UserHelper {
                                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                                         User followingUser = dataSnapshot.getValue(User.class);
                                                         FollowHelper.unfollow(user, followingUser);
+                                                        taskFinished.onNext(DELETE_FOLLOWING_FINISHED);
                                                     }
 
                                                     @Override
-                                                    public void onCancelled(@NonNull DatabaseError databaseError) { }
+                                                    public void onCancelled(@NonNull DatabaseError databaseError) { taskFinished.onNext(DELETE_FOLLOWING_FINISHED); }
                                                 });
                                     }
 
@@ -271,54 +309,98 @@ public class UserHelper {
 
                                 // be unfollowed from all users
                                 if (user.getFollowersId() != null) {
-                                    for (String followersId : user.getFollowersId()) {
+                                    deleteCounterTarget = deleteCounterTarget + DELETE_FOLLOWERS_FINISHED;
+                                    for (String followerId : user.getFollowersId()) {
                                         FirebaseConfig.getFirebaseDatabase()
                                                 .child(Constants.UsersNode.KEY)
-                                                .child(followersId)
+                                                .child(followerId)
                                                 .addListenerForSingleValueEvent(new ValueEventListener() {
                                                     @Override
                                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
                                                         User followerUser = dataSnapshot.getValue(User.class);
                                                         FollowHelper.unfollow(followerUser, user);
-
+                                                        taskFinished.onNext(DELETE_FOLLOWERS_FINISHED);
                                                     }
 
                                                     @Override
-                                                    public void onCancelled(@NonNull DatabaseError databaseError) { }
+                                                    public void onCancelled(@NonNull DatabaseError databaseError) { taskFinished.onNext(DELETE_FOLLOWERS_FINISHED); }
                                                 });
                                     }
                                 }
 
-                                // removes from basicInfoUser node make sure to call this
-                                // delete after all other database deleting
-                                FirebaseConfig.getFirebaseDatabase()
-                                        .child(Constants.UsersNode.KEY)
-                                        .child(user.getId())
-                                        .removeValue()
-                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-
-                                                } else {
-                                                    try {
-                                                        throw task.getException();
-                                                    } catch (Exception e) {
-                                                        Log.d(TAG, "onComplete: " + e.getMessage());
-                                                    }
+                                if (user.getImagePath() != null) {
+                                    deleteCounterTarget = deleteCounterTarget + DELETE_STORAGE_PROFILE_FINISHED;
+                                    FirebaseConfig.getFirebaseStorage()
+                                            .child(Constants.Storage.IMAGES)
+                                            .child(Constants.Storage.PROFILE)
+                                            .child(user.getId() + Constants.Storage.JPEG)
+                                            .delete()
+                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+                                                    taskFinished.onNext(DELETE_STORAGE_PROFILE_FINISHED);
                                                 }
-                                            }
-                                        });
+                                            })
+                                            .addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    taskFinished.onNext(DELETE_STORAGE_PROFILE_FINISHED);
+                                                }
+                                            });
+                                }
 
-                                // call this at the end
-                                firebaseUser.delete();
+                                // observer to wait all the rest be deleted first, and then, delete user node and firebaseUser
+                                // every time a node is value is found, deleteTarget is incremented, and we only access
+                                Observer<Integer> taskFinishedObserver = new Observer<Integer>() {
+                                    @Override
+                                    public void onSubscribe(@io.reactivex.rxjava3.annotations.NonNull Disposable d) { }
+
+                                    @Override
+                                    public void onNext(@io.reactivex.rxjava3.annotations.NonNull Integer deleteAction) {
+                                        deleteCounter = deleteCounter + deleteAction;
+
+                                        Log.d(TAG, "onNext -       deleteCounter: " + deleteCounter);
+                                        Log.d(TAG, "onNext - deleteCounterTarget: " + deleteCounterTarget);
+                                        if (deleteCounter == deleteCounterTarget) {
+                                            Log.d(TAG, "onNext: " + "entrei");
+                                            // Removes from basicInfoUser node make sure to call this
+                                            // Delete after all other database deleting
+                                            FirebaseConfig.getFirebaseDatabase()
+                                                    .child(Constants.UsersNode.KEY)
+                                                    .child(user.getId())
+                                                    .removeValue();
+
+                                            // delete firebaseUser
+                                            taskFinished.onComplete();
+                                            firebaseUser.delete();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onError(@io.reactivex.rxjava3.annotations.NonNull Throwable e) { }
+
+                                    @Override
+                                    public void onComplete() { }
+                                };
+                                taskFinished.subscribe(taskFinishedObserver);
+                                taskFinished.onNext(0); // just to start operation if anywhere else did
+
                             }
 
                             @Override
                             public void onCancelled(@NonNull DatabaseError databaseError) { }
                         });
-//                        TODO
-//                        REMOVER STORAGE
+
+                    } else {
+                        try {
+                            throw (task.getException());
+                        } catch (FirebaseAuthInvalidCredentialsException e) {
+                            MessageHelper.showLongToast("Senha incorreta");
+                        } catch (Exception e) {
+                                taskFinished.onError(e);
+                            MessageHelper.showLongToast("Erro ao excluir o usuário: " + e.getMessage());
+                        }
                     }
                 }
             });

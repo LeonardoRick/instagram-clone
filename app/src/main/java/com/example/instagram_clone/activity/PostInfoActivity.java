@@ -5,9 +5,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import de.hdodenhof.circleimageview.CircleImageView;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -81,6 +82,7 @@ public class PostInfoActivity extends AppCompatActivity {
 
         recoverIntentInfo();
         setLikeListener();
+        setCommentListener();
     }
 
     private void recoverIntentInfo() {
@@ -102,8 +104,6 @@ public class PostInfoActivity extends AppCompatActivity {
             postInfoLikes.setText(selectedPost.getLikes() + Constants.Labels.LIKES);
         }
     }
-
-
 
     private void setLikeListener() {
         if (selectedPost.getUsersWhoLiked() != null) {
@@ -127,6 +127,17 @@ public class PostInfoActivity extends AppCompatActivity {
         });
     }
 
+    private void setCommentListener() {
+        commentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), CommentActivity.class);
+                intent.putExtra(Constants.IntentKey.SELECTED_POST, selectedPost);
+                startActivity(intent);
+            }
+        });
+    }
+
     /**
      * listener to update on realtime posts
      */
@@ -143,7 +154,6 @@ public class PostInfoActivity extends AppCompatActivity {
                     if (dataSnapshot.exists()) {
 
                         selectedPost = dataSnapshot.getValue(Post.class);
-                        Log.d("TAG", "onDataChange: " + selectedPost.getLikes());
                         postInfoLikes.setText(selectedPost.getLikes() + Constants.Labels.LIKES);
 
                     }

@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -25,6 +27,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
+import com.example.instagram_clone.MainActivity;
 import com.example.instagram_clone.R;
 import com.example.instagram_clone.model.user.User;
 import com.example.instagram_clone.model.user.UserHelper;
@@ -56,6 +59,19 @@ public class EditProfileActivity extends AppCompatActivity {
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close_black); // chage toolbar back button icon
 
         initViewElements();
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        UserHelper.taskFinished.subscribeWith(completelyDeleteUserObserver).onSubscribe(disposable);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        disposable.dispose();
     }
 
     private void initViewElements() {
@@ -332,8 +348,8 @@ public class EditProfileActivity extends AppCompatActivity {
         alert.setPositiveButton("Sim, tenho certeza", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                User user = UserHelper.getLogged();
                 if (input.getText() != null) {
-                    User user = UserHelper.getLogged();
                     user.setPassword(input.getText().toString());
                     UserHelper.deleteUserPermanently(user);
                 }
@@ -342,4 +358,35 @@ public class EditProfileActivity extends AppCompatActivity {
         alert.create();
         alert.show();
     }
+
+    // used to deleteUserPermanentely
+    private Observer completelyDeleteUserObserver = new Observer<Integer>() {
+        @Override
+        public void onSubscribe(@io.reactivex.rxjava3.annotations.NonNull Disposable d) { }
+
+        @Override
+        public void onNext(@io.reactivex.rxjava3.annotations.NonNull Integer deleteAction ) { }
+
+        @Override
+        public void onError(@io.reactivex.rxjava3.annotations.NonNull Throwable e) { }
+
+        @Override
+        public void onComplete() {
+            MessageHelper.closeLoadingDialog();
+            MainActivity.mainActivity.finish();
+            ProfileActivity.profileActivity.finish();
+            finish();
+        }
+    };
+    private Disposable disposable = new Disposable() {
+        @Override
+        public void dispose() {
+
+        }
+
+        @Override
+        public boolean isDisposed() {
+            return false;
+        }
+    };
 }

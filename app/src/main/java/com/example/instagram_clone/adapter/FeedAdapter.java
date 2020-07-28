@@ -1,5 +1,7 @@
 package com.example.instagram_clone.adapter;
 
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.instagram_clone.R;
+import com.example.instagram_clone.activity.CommentActivity;
 import com.example.instagram_clone.model.FeedItem;
 import com.example.instagram_clone.model.post.Post;
 import com.example.instagram_clone.model.post.PostHelper;
@@ -29,9 +32,12 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder> {
 
     private List<FeedItem> postsList;
+    private Context context;
 
-    public FeedAdapter(List<FeedItem> postsList) {
+    public FeedAdapter(List<FeedItem> postsList, Context context) {
+
         this.postsList = postsList;
+        this.context = context;
     }
 
     @NonNull
@@ -67,7 +73,6 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                 .load(Uri.parse(post.getImagePath()))
                 .into(holder.postInfoImageView);
 
-
         /******* like button config *******/
         if (post.getUsersWhoLiked() != null) {
             if (post.getUsersWhoLiked().contains(loggedUserId)) {
@@ -95,8 +100,9 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         holder.commentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                TODO:
-//                startActivity()
+                Intent intent = new Intent(context, CommentActivity.class);
+                intent.putExtra(Constants.IntentKey.SELECTED_POST, post);
+                context.startActivity(intent);
             }
         });
 

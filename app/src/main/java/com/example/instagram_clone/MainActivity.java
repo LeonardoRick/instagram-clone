@@ -48,14 +48,11 @@ public class MainActivity extends AppCompatActivity {
     }
     private void configBottomView() {
         int FEED_INDEX = 0;
-        try {
-            bottomNavigation = findViewById(R.id.bottomNavigation);
-        } catch (Exception e) {
-            Log.e("TAG", "configBottomView: " + e.getMessage() );
-        }
+
+        bottomNavigation = findViewById(R.id.bottomNavigation);
         // animations
-        bottomNavigation.enableAnimation(true);
-        bottomNavigation.enableItemShiftingMode(true);
+        bottomNavigation.enableAnimation(false);
+        bottomNavigation.enableItemShiftingMode(false);
         bottomNavigation.enableShiftingMode(false);
         bottomNavigation.setTextVisibility(false);
 

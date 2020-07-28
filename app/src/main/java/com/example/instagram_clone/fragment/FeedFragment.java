@@ -45,11 +45,6 @@ public class FeedFragment extends Fragment {
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
@@ -71,7 +66,7 @@ public class FeedFragment extends Fragment {
         // LayoutManager
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         // Adapter
-        feedAdapter = new FeedAdapter(feedList);
+        feedAdapter = new FeedAdapter(feedList, getActivity());
         recyclerView.setAdapter(feedAdapter);
     }
 

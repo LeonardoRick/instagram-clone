@@ -59,6 +59,7 @@ public class Constants {
         public static final String IMAGE_PATH = "imagePath";
         public static final String LIKES = "likes";
         public static final String USERS_WHO_LIKED = "usersWhoLiked";
+        public static final String POST_COMMENTS = "postComments";
     }
 
     public static class FeedNode {
