@@ -372,9 +372,11 @@ public class EditProfileActivity extends AppCompatActivity {
 
         @Override
         public void onComplete() {
-            MessageHelper.closeLoadingDialog();
-            MainActivity.mainActivity.finish();
-            ProfileActivity.profileActivity.finish();
+            if (RegisterActivity.registerActivity != null) RegisterActivity.registerActivity.finish();
+            if (LoginActivity.loginActivity != null) LoginActivity.loginActivity.finish();
+            if (MainActivity.mainActivity != null) MainActivity.mainActivity.finish();
+            if (ProfileActivity.profileActivity != null) ProfileActivity.profileActivity.finish();
+
             finish();
         }
     };

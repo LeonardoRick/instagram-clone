@@ -24,11 +24,13 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 
 public class RegisterActivity extends AppCompatActivity {
 
+    public static RegisterActivity registerActivity;
     EditText name, email, password;
     ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        registerActivity = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 

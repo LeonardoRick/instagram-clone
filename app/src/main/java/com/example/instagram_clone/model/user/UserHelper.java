@@ -287,8 +287,8 @@ public class UserHelper {
 
                                 // unfollow all users
                                 if (user.getFollowingsId() != null) {
-                                    deleteCounterTarget = deleteCounterTarget + DELETE_FOLLOWING_FINISHED;
                                     for (String followingId : user.getFollowingsId()) {
+                                        deleteCounterTarget = deleteCounterTarget + DELETE_FOLLOWING_FINISHED;
                                         FirebaseConfig.getFirebaseDatabase()
                                                 .child(Constants.UsersNode.KEY)
                                                 .child(followingId)
@@ -309,8 +309,8 @@ public class UserHelper {
 
                                 // be unfollowed from all users
                                 if (user.getFollowersId() != null) {
-                                    deleteCounterTarget = deleteCounterTarget + DELETE_FOLLOWERS_FINISHED;
                                     for (String followerId : user.getFollowersId()) {
+                                        deleteCounterTarget = deleteCounterTarget + DELETE_FOLLOWERS_FINISHED;
                                         FirebaseConfig.getFirebaseDatabase()
                                                 .child(Constants.UsersNode.KEY)
                                                 .child(followerId)

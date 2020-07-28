@@ -23,12 +23,14 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 
 public class LoginActivity extends AppCompatActivity {
 
+    public static LoginActivity loginActivity;
     FirebaseAuth auth = FirebaseConfig.getAuth();
 
     EditText email, password;
     ProgressBar progressBar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        loginActivity = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
