@@ -2,7 +2,6 @@ package com.example.instagram_clone;
 
 import android.app.Application;
 import android.content.Context;
-import android.widget.Toast;
 
 public class CustomApplication extends Application {
     private static Context context;
