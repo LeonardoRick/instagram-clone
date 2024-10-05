@@ -1,4 +1,4 @@
-# DESCRIPTION OF INSTAGRAM CLONE APP
+# INSTAGRAM CLONE APP
 ---
 
 An app that clones main instagram functions and creates a social networok aplication that serves as base of knowledge to use features like that on future (like, follow, photo filters and lot's more)
